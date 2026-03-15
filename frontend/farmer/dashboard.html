@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - BlueCarbon Ledger</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#0d9488' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-full relative z-20">
+        <div class="p-6 flex items-center mb-6">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <a href="/api/farmer/dashboard"
+                class="flex items-center px-4 py-3 bg-teal-50 text-teal-700 rounded-xl font-medium transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> <span
+                    data-i18n="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="/api/projects"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_submit">Submit
+                    Project</span>
+            </a>
+            <a href="/api/farmer/projects"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="layers" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_my_projects">My Projects</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/api/login"
+                class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_signout">Sign Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 flex items-center justify-between p-4">
+        <div class="flex items-center">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <button id="mobile-menu-toggle" class="text-gray-600 focus:outline-none">
+            <i data-lucide="menu" class="h-6 w-6"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden mt-16 md:mt-0 relative z-10 w-full">
+        <!-- Topbar -->
+        <header
+            class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm hidden md:flex">
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl font-bold text-gray-900"><span data-i18n="welcome">Welcome back,</span> {{ farmer.name  }}</h1>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <!-- Language Selector -->
+                <div
+                    class="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus-within:ring-2 focus-within:ring-teal-500 transition-all">
+                    <i data-lucide="globe" class="w-4 h-4 text-gray-500 mr-2"></i>
+                    <select id="lang-selector"
+                        class="bg-transparent text-sm font-medium text-gray-700 focus:outline-none cursor-pointer pr-2">
+                        <option value="en">English (EN)</option>
+                        <option value="hi">हिंदी (HI)</option>
+                        <option value="te">తెలుగు (TE)</option>
+                    </select>
+                </div>
+
+                <button class="text-gray-400 hover:text-gray-500 relative">
+                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                </button>
+                <div class="h-8 w-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold">
+                    RS</div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+
+            <!-- Global Voice Help FAB -->
+            <button onclick="speak('page_help')"
+                class="fixed bottom-8 right-8 bg-teal-600 text-white rounded-full p-4 shadow-lg hover:bg-teal-700 hover:scale-105 transition-all z-40 flex items-center justify-center group"
+                title="Voice Help">
+                <i data-lucide="mic" class="w-6 h-6 animate-pulse group-hover:animate-none"></i>
+            </button>
+
+            <div class="md:hidden mb-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900"><span data-i18n="welcome">Welcome,</span> {{ farmer.name }}
+                </h1>
+                <!-- Mobile Language Dropdown -->
+                <select id="mobile-lang-selector"
+                    class="text-sm bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 font-medium focus:outline-none">
+                    <option value="en">EN</option>
+                    <option value="hi">HI</option>
+                    <option value="te">TE</option>
+                </select>
+            </div>
+
+            <!-- Dashboard Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Stat Card 1 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex items-center justify-between mb-2 relative">
+                        <h3 class="text-gray-500 text-sm font-bold uppercase tracking-wide"
+                            data-i18n="stat_projects_title">Total Projects</h3>
+                        <div class="p-2.5 bg-blue-100 rounded-xl"><i data-lucide="map-pin"
+                                class="w-5 h-5 text-blue-600"></i></div>
+                    </div>
+                    <div class="flex items-baseline space-x-2 relative mb-2">
+                        <span class="text-4xl font-bold text-gray-900">
+                            {{ total_projects|default:"0" }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-400 font-medium relative" data-i18n="stat_projects_desc">Number of
+                        mangrove sites you registered.</p>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex items-center justify-between mb-2 relative">
+                        <h3 class="text-gray-500 text-sm font-bold uppercase tracking-wide" data-i18n="stat_area_title">
+                            Total Area Planted</h3>
+                        <div class="p-2.5 bg-emerald-100 rounded-xl"><i data-lucide="trees"
+                                class="w-5 h-5 text-emerald-600"></i></div>
+                    </div>
+                    <div class="flex items-baseline space-x-2 relative mb-2">
+                        <span class="text-4xl font-bold text-gray-900">
+                            {{ total_area|default:"0" }}
+                        </span> <span class="text-sm font-medium text-gray-500"
+                            data-i18n="unit_hectares">Hectares</span>
+                    </div>
+                    <p class="text-xs text-gray-400 font-medium relative" data-i18n="stat_area_desc">Total land covered
+                        by your projects.</p>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex items-center justify-between mb-2 relative">
+                        <h3 class="text-gray-500 text-sm font-bold uppercase tracking-wide"
+                            data-i18n="stat_credits_title">Credits Earned</h3>
+                        <div class="p-2.5 bg-purple-100 rounded-xl"><i data-lucide="leaf"
+                                class="w-5 h-5 text-purple-600"></i></div>
+                    </div>
+                    <div class="flex items-baseline space-x-2 relative mb-2">
+                        <span class="text-4xl font-bold text-gray-900">
+                            {{ credits|default:"0" }}
+                        </span> <span class="text-sm font-medium text-gray-500">tCO2e</span>
+                    </div>
+                    <p class="text-xs text-gray-400 font-medium relative" data-i18n="stat_credits_desc">Total carbon
+                        credits generated from your plantations.</p>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-teal-50 rounded-full opacity-50 group-hover:scale-110 transition-transform">
+                    </div>
+                    <div class="flex items-center justify-between mb-2 relative">
+                        <h3 class="text-gray-500 text-sm font-bold uppercase tracking-wide"
+                            data-i18n="stat_earnings_title">Earnings</h3>
+                        <div class="p-2.5 bg-teal-100 rounded-xl"><i data-lucide="wallet"
+                                class="w-5 h-5 text-teal-600"></i></div>
+                    </div>
+                    <div class="flex items-baseline space-x-2 relative mb-2">
+                        <span class="text-4xl font-bold text-gray-900">
+                            ${{ earnings|default:"0" }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-400 font-medium relative" data-i18n="stat_earnings_desc">Total money
+                        earned from selling credits.</p>
+                </div>
+            </div>
+
+            <!-- Lower Section: Chart & Table -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Chart Area -->
+                <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900" data-i18n="graph_title">Carbon Sequestration Over
+                            Time</h3>
+                        <button onclick="speak('graph_explain')"
+                            class="p-2 text-teal-600 hover:bg-teal-50 rounded-full transition-colors"
+                            title="Listen to graph explanation">
+                            <i data-lucide="volume-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <div class="w-full h-80">
+                        <canvas id="carbonChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div
+                    class="lg:col-span-1 bg-white rounded-2xl p-6 flex flex-col shadow-sm border border-gray-100 h-full">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6 flex justify-between items-center">
+                        <span data-i18n="recent_activity">Recent Activity</span>
+                        <a href="/api/farmer/notifications"
+                            class="text-sm text-teal-600 font-medium hover:underline bg-teal-50 px-3 py-1 rounded-full transition-colors"
+                            data-i18n="view_all">View All</a>
+                    </h3>
+                    <div class="space-y-6 flex-1">
+                        <div class="flex items-start space-x-4">
+                            <div class="p-2 bg-green-50 text-green-600 rounded-full mt-1">
+                                <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-900">Project "Mahanadi Delta" Approved</p>
+                                <p class="text-xs text-gray-500 mt-1">Panchayat verified biomass via AI estimation.</p>
+                                <p class="text-xs text-gray-400 mt-1 font-medium">2 days ago</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="p-2 bg-blue-50 text-blue-600 rounded-full mt-1">
+                                <i data-lucide="coins" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-900">Credits Sold</p>
+                                <p class="text-xs text-gray-500 mt-1">EcoCorp bought 500 tokens from Sundarbans Sector
+                                    A.</p>
+                                <p class="text-xs text-gray-400 mt-1 font-medium">1 week ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Mobile Slide-out Menu backdrop -->
+    <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-gray-900/50 z-40 hidden md:hidden"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // -------------------------------------------------------------
+        // I18N AND TEXT-TO-SPEECH DICTIONARY
+        // -------------------------------------------------------------
+        const translations = {
+            'en': {
+                'nav_dashboard': "Dashboard",
+                'nav_submit': "Submit Project",
+                'nav_my_projects': "My Projects",
+                'nav_signout': "Sign Out",
+                'welcome': "Welcome back,",
+                'stat_projects_title': "Total Projects",
+                'stat_projects_desc': "Number of mangrove sites you registered.",
+                'stat_area_title': "Total Area Planted",
+                'stat_area_desc': "Total land covered by your projects.",
+                'unit_hectares': "Hectares",
+                'stat_credits_title': "Credits Earned",
+                'stat_credits_desc': "Total carbon credits generated from your plantations.",
+                'stat_earnings_title': "Earnings",
+                'stat_earnings_desc': "Total money earned from selling credits.",
+                'graph_title': "Carbon Sequestration Over Time",
+                'recent_activity': "Recent Activity",
+                'view_all': "View All",
+                // TTS Audio Keys
+                'graph_explain': "This graph shows how much carbon your mangrove trees captured over time.",
+                'page_help': "This is your dashboard. It shows how many projects you have, your total planted area, and money earned. You can submit a new project using the menu on the left."
+            },
+            'hi': {
+                'nav_dashboard': "डैशबोर्ड",
+                'nav_submit': "नया प्रोजेक्ट जोड़ें",
+                'nav_my_projects': "मेरे प्रोजेक्ट्स",
+                'nav_signout': "लॉग आउट",
+                'welcome': "वापसी पर स्वागत है,",
+                'stat_projects_title': "कुल प्रोजेक्ट्स",
+                'stat_projects_desc': "आपके द्वारा पंजीकृत मैंग्रोव साइटों की संख्या।",
+                'stat_area_title': "लगाया गया कुल क्षेत्र",
+                'stat_area_desc': "आपके प्रोजेक्ट्स द्वारा कवर की गई कुल भूमि।",
+                'unit_hectares': "हेक्टेयर",
+                'stat_credits_title': "क्रेडिट अर्जित",
+                'stat_credits_desc': "आपके वृक्षारोपण से उत्पन्न कुल कार्बन क्रेडिट।",
+                'stat_earnings_title': "कमाई",
+                'stat_earnings_desc': "क्रेडिट बेचने से कमाया गया कुल पैसा।",
+                'graph_title': "समय के साथ कार्बन जब्ती",
+                'recent_activity': "हाल की गतिविधि",
+                'view_all': "सभी देखें",
+                // TTS Audio Keys
+                'graph_explain': "यह ग्राफ दिखाता है कि आपके मैंग्रोव पेड़ों ने समय के साथ कितना कार्बन अवशोषित किया।",
+                'page_help': "यह आपका डैशबोर्ड है। यह दिखाता है कि आपके पास कितने प्रोजेक्ट हैं, आपका कुल लगाया गया क्षेत्र, और कमाया गया पैसा। आप बाईं ओर मेनू का उपयोग करके एक नया प्रोजेक्ट सबमिट कर सकते हैं।"
+            },
+            'te': {
+                'nav_dashboard': "డాష్‌బోర్డ్",
+                'nav_submit': "కొత్త ప్రాజెక్ట్‌ను సమర్పించండి",
+                'nav_my_projects': "నా ప్రాజెక్ట్‌లు",
+                'nav_signout': "సైన్ అవుట్",
+                'welcome': "తిరిగి స్వాగతం,",
+                'stat_projects_title': "మొత్తం ప్రాజెక్ట్‌లు",
+                'stat_projects_desc': "మీరు నమోదు చేసిన మడ అడవుల సంఖ్య.",
+                'stat_area_title': "మొత్తం నాటిన ప్రాంతం",
+                'stat_area_desc': "మీ ప్రాజెక్ట్‌ల ద్వారా కవర్ చేయబడిన మొత్తం భూమి.",
+                'unit_hectares': "హెక్టార్లు",
+                'stat_credits_title': "ఆర్జించిన క్రెడిట్స్",
+                'stat_credits_desc': "మీ తోటల నుండి ఉత్పత్తి చేయబడిన మొత్తం కార్బన్ క్రెడిట్స్.",
+                'stat_earnings_title': "సంపాదనలు",
+                'stat_earnings_desc': "క్రెడిట్లను విక్రయించడం ద్వారా వచ్చిన మొత్తం డబ్బు.",
+                'graph_title': "కాలక్రమంలో కార్బన్ నిల్వ",
+                'recent_activity': "ఇటీవలి ఆక్టివిటీ",
+                'view_all': "అన్ని చూడండి",
+                // TTS Audio Keys
+                'graph_explain': "ఈ గ్రాఫ్ మీ మంగ్రోవ్ చెట్లు కాలక్రమంలో ఎంత కార్బన్ నిల్వ చేశాయో చూపిస్తుంది.",
+                'page_help': "ఇది మీ డాష్‌బోర్డ్. ఇది మీ ప్రాజెక్ట్‌ల సంఖ్యను, మొత్తం నాటిన ప్రాంతాన్ని మరియు ఆర్జించిన డబ్బును చూపుతుంది. మీరు ఎడమ వైపున ఉన్న మెనుని ఉపయోగించి కొత్త ప్రాజెక్ట్‌ను సమర్పించవచ్చు."
+            }
+        };
+
+        // Language State Management
+        let currentLang = localStorage.getItem('farmer_lang') || 'en';
+
+        function updateUIText() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
+                }
+            });
+            document.getElementById('lang-selector').value = currentLang;
+            document.getElementById('mobile-lang-selector').value = currentLang;
+        }
+
+        // Dropdown Handlers
+        document.getElementById('lang-selector').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('farmer_lang', currentLang);
+            updateUIText();
+        });
+
+        document.getElementById('mobile-lang-selector').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('farmer_lang', currentLang);
+            updateUIText();
+        });
+
+        // Speech Synthesis Helper
+        function speak(key) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = translations[currentLang][key];
+                let msg = new SpeechSynthesisUtterance(text);
+
+                if (currentLang === 'hi') msg.lang = 'hi-IN';
+                else if (currentLang === 'te') msg.lang = 'te-IN';
+                else msg.lang = 'en-US';
+
+                msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            } else {
+                alert('Text-to-speech not supported in this browser.');
+            }
+        }
+
+        // Initialize UI
+        updateUIText();
+
+
+        // -------------------------------------------------------------
+        // CHART & INTERACTIONS
+        // -------------------------------------------------------------
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('carbonChart').getContext('2d');
+            const carbonChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    datasets: [{
+                        label: 'tCO2e Captured',
+                        data: [120, 190, 300, 500, 800, 1200, 1800],
+                        borderColor: '#0d9488',
+                        backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                        borderWidth: 4,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#0d9488',
+                        pointHoverRadius: 8,
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, family: 'Inter' },
+                            bodyFont: { size: 13, family: 'Inter' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [5, 5], color: '#f3f4f6' },
+                            border: { display: false }
+                        },
+                        x: {
+                            grid: { display: false },
+                            border: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Mobile menu logic
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.querySelector('aside');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('absolute');
+                sidebar.classList.toggle('left-0');
+                sidebar.classList.toggle('top-0');
+                sidebar.classList.toggle('h-full');
+                sidebar.classList.toggle('z-50');
+                backdrop.classList.toggle('hidden');
+            });
+            backdrop.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('absolute', 'left-0', 'top-0', 'h-full', 'z-50');
+                backdrop.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+
+</html>

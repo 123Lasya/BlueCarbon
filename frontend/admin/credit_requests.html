@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Requests - BlueCarbon Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 900: '#14532d' },
+                        surface: { 50: '#f8fafc', 100: '#f1f5f9', 800: '#1e293b', 900: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+
+</head>
+
+<body class="bg-surface-50 flex h-screen overflow-hidden text-gray-900 ">
+
+        <!-- Sidebar -->
+    <aside class="w-64 glass-dark text-white hidden md:flex flex-col relative z-20">
+        <div class="p-8 border-b border-white/10 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <i data-lucide="leaf" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+                <span class="font-bold text-lg tracking-tight leading-none block">GovAdmin</span>
+                <span class="text-xs text-slate-400 font-medium tracking-wider uppercase">Portal</span>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 space-y-1.5 mt-6 relative z-10">
+            <a href="/api/admin/dashboard" class="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 rounded-2xl text-slate-300 font-medium transition-all group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-white transition-colors"></i> Overview & Map
+            </a>
+            <a href="/api/admin/credit-requests" class="flex items-center gap-3 px-4 py-3.5 bg-brand-500/10 rounded-2xl text-brand-400 font-semibold transition-all group">
+                <i data-lucide="file-text" class="w-5 h-5  transition-colors"></i> Credit Requests
+            </a>
+            <a href="/api/admin/analytics" class="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 rounded-2xl text-slate-300 font-medium transition-all group">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 group-hover:text-white transition-colors"></i> Analytics
+            </a>
+            <a href="/api/admin/map" class="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 rounded-2xl text-slate-300 font-medium transition-all group">
+                <i data-lucide="map" class="w-5 h-5 group-hover:text-white transition-colors"></i> National Map View
+            </a>
+        </nav>
+
+        <!-- User Profile Area -->
+        <div class="p-6 border-t border-white/10">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-sm font-bold text-slate-300">
+                        AD
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-white leading-tight">Admin User</p>
+                        <p class="text-xs text-slate-400">Government Node</p>
+                    </div>
+                </div>
+                <a href="/api/login" class="text-slate-400 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-white/5" title="Sign Out">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8">
+
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold">Credit Allocation Requests</h1>
+            <p class="text-gray-500 text-sm mt-1">Review and approve pending company credit requests globally.</p>
+        </div>
+
+        <!-- 4-Card Summary Top Panel -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-start justify-between">
+                <div>
+                    <h3 class="text-gray-500 text-sm font-medium mb-1">Total Requests</h3>
+                    <p class="text-3xl font-bold text-gray-900">{{ stats.total }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                    <i data-lucide="files" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <div
+                class="bg-white p-6 rounded-2xl shadow-sm border border-amber-200 border-l-4 border-l-amber-500 flex items-start justify-between">
+                <div>
+                    <h3 class="text-amber-700 text-sm font-medium mb-1">Pending Requests</h3>
+                    <p class="text-3xl font-bold text-gray-900">{{ stats.pending }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                    <i data-lucide="clock" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <div
+                class="bg-white p-6 rounded-2xl shadow-sm border border-green-200 border-l-4 border-l-green-500 flex items-start justify-between">
+                <div>
+                    <h3 class="text-green-700 text-sm font-medium mb-1">Approved/Allocated</h3>
+                    <p class="text-3xl font-bold text-gray-900">{{ stats.approved }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                </div>
+            </div>
+
+            <div
+                class="bg-white p-6 rounded-2xl shadow-sm border border-red-200 border-l-4 border-l-red-500 flex items-start justify-between">
+                <div>
+                    <h3 class="text-red-700 text-sm font-medium mb-1">Rejected Requests</h3>
+                    <p class="text-3xl font-bold text-gray-900">{{ stats.rejected }}</p>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Active Pending Queue</h2>
+            </div>
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Company</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Request Type & Target</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Credits</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Submitted</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Purpose</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for req in requests %}
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-5">
+                            <span class="font-bold text-gray-900 block mb-1">{{ req.company_name }}</span>
+                            {% if req.proof_document %}
+                            <button type="button"
+                                onclick="openProofModal('{{ req.company_name|escapejs }}', '{{ req.proof_document.url }}')"
+                                class="inline-flex items-center text-xs text-teal-600 hover:text-teal-800 font-semibold transition-colors bg-teal-50 px-2 py-1 rounded">
+                                <i data-lucide="eye" class="w-3 h-3 mr-1"></i> View Authorization
+                            </button>
+                            {% else %}
+                            <span class="inline-flex items-center text-xs text-gray-400 font-medium">
+                                <i data-lucide="file-minus" class="w-3 h-3 mr-1"></i> No Proof
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-5">
+                            {% if req.request_type == 'FARMER_REQUEST' %}
+                            <span
+                                class="inline-flex px-2.5 py-1 bg-blue-100/50 text-blue-700 rounded-lg text-xs font-bold tracking-wide uppercase border border-blue-200 mb-2">Direct
+                                Farmer</span><br />
+                            <div class="flex items-center text-sm">
+                                <i data-lucide="user" class="w-4 h-4 text-gray-400 mr-2"></i>
+                                <span class="font-semibold text-gray-900">{{ req.farmer.name }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500 pl-6 mt-0.5 max-w-[200px] truncate"
+                                title="{{ req.project.project_name }}">Project: {{ req.project.project_name }}</div>
+                            {% else %}
+                            <span
+                                class="inline-flex px-2.5 py-1 bg-purple-100/50 text-purple-700 rounded-lg text-xs font-bold tracking-wide uppercase border border-purple-200">Bulk
+                                Pool Allocation</span>
+                            <div class="text-xs text-gray-500 mt-2"><i data-lucide="globe"
+                                    class="w-3 h-3 inline mr-1"></i>Global Fulfillment</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            <span class="font-bold text-lg text-teal-700 block">{{ req.credits_requested }}</span>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">tCO2e</span>
+                        </td>
+                        <td class="px-6 py-5 text-center text-sm font-medium text-gray-500">
+                            {{ req.submitted_at|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-5 text-sm text-gray-600 max-w-[250px]">
+                            <p class="truncate" title="{{ req.purpose }}">{{ req.purpose }}</p>
+                        </td>
+                        <td class="px-6 py-5 text-right whitespace-nowrap">
+                            <form action="/api/admin/approve-credit-request" method="POST" class="inline">
+                                <input type="hidden" name="id" value="{{ req.id }}">
+                                <button
+                                    class="bg-teal-600/90 text-white px-4 py-2 rounded-xl hover:bg-teal-700 font-bold text-sm transition-all shadow-sm">
+                                    <i data-lucide="check" class="w-4 h-4 inline mr-1"></i> Approve
+                                </button>
+                            </form>
+                            <button type="button"
+                                onclick="openRejectModal('{{ req.id }}', '{{ req.company_name|escapejs }}')"
+                                class="bg-white text-red-600 border border-red-200 px-4 py-2 rounded-xl hover:bg-red-50 font-bold text-sm ml-2 transition-all shadow-sm">
+                                Reject
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-16 text-center">
+                            <div
+                                class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                                <i data-lucide="check-circle" class="w-8 h-8 text-teal-400"></i>
+                            </div>
+                            <h3 class="text-gray-900 font-bold text-lg">No pending requests</h3>
+                            <p class="text-sm text-gray-500 mt-1">All company credit requests have been processed or the
+                                queue is currently empty.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Multi-Format Document Viewer Modal -->
+    <div id="proofModal"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-11/12 max-w-4xl h-[85vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-200"
+            id="proofModalContent">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="file-badge" class="w-5 h-5 text-teal-600"></i>
+                    <span id="proofCompanyName" class="text-teal-700"></span> - Authorization Proof
+                </h3>
+                <button onclick="closeProofModal()"
+                    class="text-gray-400 hover:text-gray-600 bg-white shadow-sm border border-gray-200 rounded-full p-1 transition-all hover:bg-gray-50">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex-1 bg-slate-100 relative overflow-hidden flex items-center justify-center"
+                id="proofContainer">
+                <!-- Dynamic embed inserted by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-xl w-11/12 max-w-md overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-red-50/50">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+                    Reject Request
+                </h3>
+                <button onclick="closeRejectModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-5">Are you sure you want to reject the credit request from <span
+                        id="modalCompanyName" class="font-bold text-gray-900"></span>? This notification will be visible
+                    on their portfolio.</p>
+
+                <form action="/api/admin/reject-credit-request" method="POST" class="space-y-4">
+                    <input type="hidden" name="id" id="modalRequestId">
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Rejection Reason <span
+                                class="text-red-500">*</span></label>
+                        <textarea name="reason" rows="2" required
+                            class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-shadow"
+                            placeholder="e.g., Missing compliance documentation, invalid purpose..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Internal Notes</label>
+                        <textarea name="notes" rows="2"
+                            class="w-full border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-shadow"
+                            placeholder="Optional. Only visible to Admins..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                        <button type="button" onclick="closeRejectModal()"
+                            class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-xl transition-colors">Cancel</button>
+                        <button type="submit"
+                            class="px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-sm rounded-xl transition-colors">Confirm
+                            Rejection</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function openRejectModal(id, company) {
+            document.getElementById('modalRequestId').value = id;
+            document.getElementById('modalCompanyName').textContent = company;
+            document.getElementById('rejectModal').classList.remove('hidden');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.add('hidden');
+        }
+
+        function openProofModal(company, url) {
+            document.getElementById('proofCompanyName').textContent = company;
+            const container = document.getElementById('proofContainer');
+            container.innerHTML = '';
+
+            const ext = url.split('.').pop().toLowerCase();
+            if (ext === 'pdf') {
+                container.innerHTML = `<iframe src="${url}" class="w-full h-full border-0"></iframe>`;
+            } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                container.innerHTML = `<img src="${url}" class="max-w-full max-h-full object-contain p-4 drop-shadow-md">`;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+                        <i data-lucide="file-question" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                        <p class="mb-4 text-gray-600 font-medium">This file format (${ext.toUpperCase()}) cannot be previewed directly in the browser.</p>
+                        <a href="${url}" target="_blank" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-colors inline-block">Download File</a>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+
+            const modal = document.getElementById('proofModal');
+            const content = document.getElementById('proofModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+        }
+
+        function closeProofModal() {
+            const modal = document.getElementById('proofModal');
+            const content = document.getElementById('proofModalContent');
+            const container = document.getElementById('proofContainer');
+
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                container.innerHTML = ''; // release resources
+            }, 200);
+        }
+    </script>
+</body>
+
+</html>

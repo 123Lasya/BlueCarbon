@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Project - BlueCarbon Ledger</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d9488',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        .modal {
+            display: none;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-full relative z-20">
+        <div class="p-6 flex items-center mb-6">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon Ledger</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <a href="/api/panchayat/dashboard"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="clipboard-check" class="w-5 h-5 mr-3"></i> Verification Queue
+            </a>
+            <a href="/api/panchayat/village-map"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="map" class="w-5 h-5 mr-3"></i> Village Map
+            </a>
+            <a href="/api/panchayat/local-farmers"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="users" class="w-5 h-5 mr-3"></i> Local Farmers
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/api/login"
+                class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 flex items-center justify-between p-4">
+        <div class="flex items-center">
+            <a href="/api/panchayat/dashboard" class="mr-3 text-gray-600">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+            <span class="font-bold text-lg text-gray-900 truncate">Review: {{ project.project_name }}</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden mt-16 md:mt-0 relative z-10 w-full">
+        <!-- Topbar -->
+        <header
+            class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm hidden md:flex">
+            <div class="flex items-center">
+                <a href="/api/panchayat/dashboard"
+                    class="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
+                <h1 class="text-xl font-bold text-gray-900">Project Review</h1>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <button type="button" onclick="speakHelp()"
+                    class="flex items-center px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-sm font-semibold hover:bg-teal-100 transition-colors mr-2">
+                    <i data-lucide="volume-2" class="w-4 h-4 mr-2"></i> Voice Help
+                </button>
+                <div class="h-8 w-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
+                    GP
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50">
+
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- PROJECT CARD -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div
+                        class="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">{{ project.project_name }}</h2>
+                            <p class="text-gray-500 mt-1 flex items-center">
+                                <i data-lucide="map-pin" class="w-4 h-4 mr-1"></i> {{ project.location }}
+                            </p>
+                        </div>
+                        <span
+                            class="mt-3 md:mt-0 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wide">
+                            Pending Verification
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                        <!-- Farmer Details -->
+                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Farmer Details
+                            </h3>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-gray-600 text-sm">Name</p>
+                                <p class="font-semibold text-gray-900">{{ project.farmer.name }}</p>
+                            </div>
+                            <div class="flex items-center justify-between mb-4">
+                                <p class="text-gray-600 text-sm">Phone</p>
+                                <p class="font-semibold text-gray-900">{{ project.farmer.phone }}</p>
+                            </div>
+                            <a href="tel:{{ project.farmer.phone }}"
+                                class="w-full flex items-center justify-center py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm">
+                                <i data-lucide="phone-call" class="w-4 h-4 mr-2"></i> Call Farmer
+                            </a>
+                        </div>
+
+                        <!-- Plantation Details -->
+                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Plantation Records
+                            </h3>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-gray-600 text-sm">Species</p>
+                                <p class="font-semibold text-gray-900">{{ project.species }}</p>
+                            </div>
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-gray-600 text-sm">Area</p>
+                                <p class="font-semibold text-gray-900">{{ project.plantation_area }} Hectares</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-gray-600 text-sm">Planted On</p>
+                                <p class="font-semibold text-gray-900">{{ project.plantation_date }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAP SECTION -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <i data-lucide="map" class="w-5 h-5 mr-2 text-teal-600"></i> Project Location Map
+                    </h3>
+                    <div id="map"></div>
+                    <input type="hidden" id="project_coords" value="{{ project.description }}">
+                </div>
+
+                <!-- FIELD VERIFICATION EVIDENCE -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 border-l-4 border-l-teal-500">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <i data-lucide="camera" class="w-5 h-5 mr-2 text-teal-600"></i> Field Verification
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-6">Panchayat officers must capture matching evidence on-field to
+                        approve projects.</p>
+
+                    <form id="approve-form" action="/api/verify/approve" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="projectId" value="{{ project.id }}">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- GPS Capture -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Live Location</label>
+                                <button type="button" id="btn-gps"
+                                    class="w-full flex items-center justify-center p-4 border border-teal-200 bg-teal-50 text-teal-700 rounded-xl hover:bg-teal-100 transition-colors font-medium">
+                                    <i data-lucide="navigation" class="w-5 h-5 mr-2"></i> Capture My Location
+                                </button>
+                                <div class="flex space-x-2 mt-2">
+                                    <input type="text" name="latitude" id="latitude"
+                                        class="w-full text-xs p-2 bg-gray-50 border border-gray-200 rounded focus:outline-none"
+                                        placeholder="Lat" readonly required>
+                                    <input type="text" name="longitude" id="longitude"
+                                        class="w-full text-xs p-2 bg-gray-50 border border-gray-200 rounded focus:outline-none"
+                                        placeholder="Long" readonly required>
+                                </div>
+                            </div>
+
+                            <!-- Camera Capture -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Field Photo</label>
+                                <label for="evidence_image"
+                                    class="w-full h-14 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors group">
+                                    <i data-lucide="camera"
+                                        class="w-5 h-5 text-gray-400 group-hover:text-teal-600 mr-2"></i>
+                                    <span class="text-sm font-medium text-gray-600 group-hover:text-teal-700"
+                                        id="photo-label">Take Photo / Upload</span>
+                                    <input type="file" name="evidence_image" id="evidence_image" accept="image/*"
+                                        capture="environment" class="hidden" required>
+                                </label>
+                                <p class="text-xs text-green-600 mt-2 font-medium hidden" id="photo-success">✓ Image
+                                    attached successfully</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-4 pt-4 border-t border-gray-100 mt-8">
+                            <button type="button" id="btn-reject"
+                                class="flex-1 py-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors border border-gray-200">
+                                Reject Project
+                            </button>
+                            <button type="submit" id="btn-approve"
+                                class="flex-1 py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                Approve Evidence
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="h-8 w-full"></div> <!-- Spacer -->
+        </div>
+    </main>
+
+    <!-- Reject Modal -->
+    <div id="reject-modal"
+        class="modal fixed inset-0 bg-gray-900/60 z-50 items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center"><i data-lucide="alert-triangle"
+                        class="w-5 h-5 text-red-500 mr-2"></i> Reject Project</h3>
+                <button type="button" class="text-gray-400 hover:text-gray-500"
+                    onclick="document.getElementById('reject-modal').classList.remove('active')"><i data-lucide="x"
+                        class="w-5 h-5"></i></button>
+            </div>
+            <form action="/api/verify/reject" method="POST">
+                <div class="p-6">
+                    <input type="hidden" name="projectId" value="{{ project.id }}">
+                    <p class="text-sm text-gray-600 mb-4">Please provide a reason for rejecting this project submission.
+                        This feedback will be sent to the farmer.</p>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Rejection Reason</label>
+                    <select name="rejectReason" id="rejectReason"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option value="Plantation not found">Plantation not found at location</option>
+                        <option value="Incorrect coordinates">Incorrect GPS coordinates</option>
+                        <option value="Area mismatch">Claimed area does not match reality</option>
+                        <option value="Invalid species / Not mangroves">Invalid species / Not mangroves</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex space-x-3 justify-end">
+                    <button type="button" onclick="document.getElementById('reject-modal').classList.remove('active')"
+                        class="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700">Confirm
+                        Reject</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Leaflet Map Initialization
+            const coordsString = document.getElementById('project_coords').value;
+            let center = [21.82, 88.88]; // Default Sundarbans fallback
+
+            if (coordsString && coordsString.includes(',')) {
+                const parts = coordsString.split(',');
+                center = [parseFloat(parts[0]), parseFloat(parts[1])];
+            }
+
+            const map = L.map('map').setView(center, 14);
+
+            // Satellite Layer
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri'
+            }).addTo(map);
+
+            // Labels Layer
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Esri Boundaries/Places'
+            }).addTo(map);
+
+            // Add Marker for Farmers' coords
+            L.marker(center).addTo(map)
+                .bindPopup('<b class="text-teal-600">{{ project.project_name }}</b><br>Declared Location')
+                .openPopup();
+
+            // GPS Feature
+            const btnGps = document.getElementById('btn-gps');
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+
+            btnGps.addEventListener('click', () => {
+                const originalHtml = btnGps.innerHTML;
+                btnGps.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i> Getting Location...`;
+                lucide.createIcons();
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            latInput.value = position.coords.latitude.toFixed(6);
+                            lngInput.value = position.coords.longitude.toFixed(6);
+                            btnGps.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Location Saved`;
+                            btnGps.classList.remove('bg-teal-50', 'text-teal-700', 'border-teal-200');
+                            btnGps.classList.add('bg-green-50', 'text-green-700', 'border-green-300');
+                            lucide.createIcons();
+                        },
+                        (error) => {
+                            alert("Geolocation failed or denied. Please enable GPS permissions.");
+                            btnGps.innerHTML = originalHtml;
+                            lucide.createIcons();
+                        },
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    );
+                } else {
+                    alert("Geolocation is not supported by this browser.");
+                }
+            });
+
+            // Camera / Image change
+            const evidenceImage = document.getElementById('evidence_image');
+            const photoLabel = document.getElementById('photo-label');
+            const photoSuccess = document.getElementById('photo-success');
+
+            evidenceImage.addEventListener('change', () => {
+                if (evidenceImage.files.length > 0) {
+                    photoLabel.innerText = "Captured: " + evidenceImage.files[0].name.substring(0, 15) + "...";
+                    photoSuccess.classList.remove('hidden');
+                }
+            });
+
+            // Rejection modal
+            const btnReject = document.getElementById('btn-reject');
+            const modal = document.getElementById('reject-modal');
+
+            btnReject.addEventListener('click', () => {
+                modal.classList.add('active');
+            });
+        });
+
+        // Optional Voice Help
+        function speakHelp() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                // Determine user lang
+                let lang = localStorage.getItem('farmer_lang') || 'en';
+                let text = "This page helps Panchayat officers verify mangrove plantations submitted by farmers. Capture your GPS location and take a field photo to approve the project. You may also call the farmer if needed.";
+
+                if (lang === 'hi') {
+                    text = "यह पेज पंचायत अधिकारियों को किसानों द्वारा जमा की गई परियोजनाओं को सत्यापित करने में मदद करता है। प्रोजेक्ट को स्वीकृत करने के लिए अपना जीपीएस स्थान कैप्चर करें और खेत की फोटो लें।";
+                } else if (lang === 'te') {
+                    text = "ఈ పేజీ రైతులు సమర్పించిన మంగ్రోవ్ ప్రాజెక్టులను పంచాయితీ అధికారులు ధృవీకరించడానికి సహాయపడుతుంది. ప్రాజెక్టును ఆమోదించడానికి మీ GPS స్థానాన్ని క్యాప్చర్ చేయండి మరియు ఒక ఫీల్డ్ ఫోటోను తీయండి.";
+                }
+
+                let msg = new SpeechSynthesisUtterance(text);
+                if (lang === 'hi') msg.lang = 'hi-IN';
+                else if (lang === 'te') msg.lang = 'te-IN';
+                else msg.lang = 'en-US';
+
+                window.speechSynthesis.speak(msg);
+            }
+        }
+    </script>
+</body>
+
+</html>

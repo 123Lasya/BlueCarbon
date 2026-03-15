@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        #map {
+            height: 600px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h2>Blue Carbon Projects Map</h2>
+
+    <div id="map"></div>
+
+    <script>
+
+        var map = L.map('map').setView([20.5937, 78.9629], 5);
+
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        ).addTo(map);
+
+        fetch("/api/projects/map")
+            .then(res => res.json())
+            .then(data => {
+
+                data.forEach(project => {
+
+                    L.marker([project.lat, project.lng])
+                        .addTo(map)
+                        .bindPopup(
+                            "<b>" + project.name + "</b><br>" +
+                            "Credits:" + project.credits
+                        );
+
+                });
+
+            });
+
+    </script>
+
+</body>
+
+</html>

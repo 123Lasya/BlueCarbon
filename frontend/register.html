@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - BlueCarbon Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#0d9488', secondary: '#2563eb' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    animation: { 'gradient-x': 'gradient-x 15s ease infinite' },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .hero-bg {
+            background-size: 400% 400%;
+            animation: gradient-x 15s ease infinite;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-large {
+            min-height: 48px;
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(to right, #0d9488, #2563eb);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .role-icon {
+            transition: transform 0.2s ease;
+        }
+
+        .group:hover .role-icon {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body class="hero-bg min-h-screen py-8 px-4 flex items-center justify-center relative overflow-x-hidden">
+
+    <!-- Decorative Floating Elements -->
+    <div class="absolute top-10 left-10 text-teal-200/20 w-32 h-32 blur-sm pointer-events-none">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+                d="M17.5,12A5.5,5.5,0,0,1,12,17.5V20.5A1.5,1.5,0,0,1,10.5,22H9a1,1,0,0,1,0-2h1.5v-2.586a7.493,7.493,0,0,1-3.6-7.82l.37-2.21a20.08,20.08,0,0,1,5.2-10A1,1,0,0,1,13,2.446a16.666,16.666,0,0,0-2.31,4.417c2.81-1.332,6.37-1.125,8.12,1.381A5.5,5.5,0,0,1,17.5,12Z" />
+        </svg>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="absolute top-4 right-4 z-20">
+        <div
+            class="flex items-center space-x-2 bg-black/30 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10 hover:bg-black/40 transition-colors">
+            <i data-lucide="globe" class="w-4 h-4 text-white"></i>
+            <select id="lang-selector"
+                class="bg-transparent text-white text-sm focus:outline-none appearance-none cursor-pointer pr-4 font-medium">
+                <option value="en" class="text-black">English</option>
+                <option value="te" class="text-black">తెలుగు (Telugu)</option>
+                <option value="hi" class="text-black">हिंदी (Hindi)</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-white absolute right-3 pointer-events-none"></i>
+        </div>
+    </div>
+
+    <div class="w-full max-w-2xl glass-card relative overflow-hidden flex flex-col">
+        <!-- Back button top left over image -->
+        <a href="index.html"
+            class="absolute top-4 left-4 text-white z-10 bg-black/30 p-2 rounded-full hover:bg-black/50 transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+
+        <!-- Large Illustration / Header Image -->
+        <div class="relative h-48 sm:h-56 w-full">
+            <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=1200"
+                alt="Mangrove Planting" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-white to-transparent"></div>
+        </div>
+
+        <div class="px-6 pb-10 pt-2 sm:px-10">
+            <!-- Step Indicator -->
+            <div class="flex justify-center items-center mb-8 space-x-2 text-xs sm:text-sm font-medium">
+                <div class="flex flex-col items-center text-teal-600">
+                    <div
+                        class="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center mb-1 ring-4 ring-white shadow-sm border border-teal-200">
+                        1</div>
+                    <span>Account</span>
+                </div>
+                <div class="w-10 h-1 bg-gray-200 rounded-full mb-5"></div>
+                <div class="flex flex-col items-center text-gray-400">
+                    <div
+                        class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-1 border border-gray-200">
+                        2</div>
+                    <span>Project</span>
+                </div>
+                <div class="w-10 h-1 bg-gray-200 rounded-full mb-5"></div>
+                <div class="flex flex-col items-center text-gray-400">
+                    <div
+                        class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-1 border border-gray-200">
+                        3</div>
+                    <span>Earn</span>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Join BlueCarbon</h2>
+                <p class="text-gray-500 mt-2">Create an account to verify and trade your blue carbon credits.</p>
+            </div>
+
+            <form id="register-form" action="/api/register" method="POST" class="space-y-6"
+                enctype="multipart/form-data" novalidate>
+                <input type="hidden" name="role" id="role-input" value="farmer">
+
+                <!-- Big Role Selection -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-3">Select your role</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button type="button" data-role="farmer"
+                            class="role-btn border-2 border-teal-500 bg-teal-50 text-teal-800 p-4 rounded-xl flex flex-row items-center text-left transition-all hover:bg-teal-100 hover:shadow-sm h-full group">
+                            <div class="mr-3 text-teal-600 font-bold role-icon">
+                                <i data-lucide="sprout" class="w-7 h-7"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-base">Farmer / NGO</h3>
+                                <p class="text-xs text-teal-600/80 mt-1 leading-tight">Plant mangrove trees and earn
+                                    carbon credits</p>
+                            </div>
+                        </button>
+                        <button type="button" data-role="panchayat"
+                            class="role-btn border-2 border-gray-100 bg-white text-gray-600 p-4 rounded-xl flex flex-row items-center text-left transition-all hover:border-teal-300 hover:shadow-sm h-full group">
+                            <div class="mr-3 text-gray-400 font-bold role-icon">
+                                <i data-lucide="landmark" class="w-7 h-7"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">Panchayat</h3>
+                                <p class="text-xs text-gray-500 mt-1 leading-tight">Verify local projects from the
+                                    community</p>
+                            </div>
+                        </button>
+                        <button type="button" data-role="company"
+                            class="role-btn border-2 border-gray-100 bg-white text-gray-600 p-4 rounded-xl flex flex-row items-center text-left transition-all hover:border-teal-300 hover:shadow-sm h-full group">
+                            <div class="mr-3 text-gray-400 font-bold role-icon">
+                                <i data-lucide="building-2" class="w-7 h-7"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">Company</h3>
+                                <p class="text-xs text-gray-500 mt-1 leading-tight">Purchase verified blue carbon tokens
+                                </p>
+                            </div>
+                        </button>
+                        <button type="button" data-role="admin"
+                            class="role-btn border-2 border-gray-100 bg-white text-gray-600 p-4 rounded-xl flex flex-row items-center text-left transition-all hover:border-teal-300 hover:shadow-sm h-full group">
+                            <div class="mr-3 text-gray-400 font-bold role-icon">
+                                <i data-lucide="shield-check" class="w-7 h-7"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-base text-gray-800">Admin</h3>
+                                <p class="text-xs text-gray-500 mt-1 leading-tight">Manage the ecosystem and analytics
+                                </p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Fields with Icons and Voice Help -->
+                <div class="space-y-5 mt-8">
+
+                    <!-- Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
+                        <div class="relative">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i data-lucide="user" class="w-5 h-5"></i>
+                            </div>
+                            <input id="name" name="name" type="text" required
+                                class="input-large block w-full border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white shadow-sm"
+                                placeholder="John Doe">
+                            <button type="button" onclick="speak('name')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-600 hover:text-teal-800"
+                                title="Listen to instruction">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p class="text-red-500 text-sm hidden mt-1" id="err-name">Name is required.</p>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-bold text-gray-700 mb-1">Email address</label>
+                        <div class="relative">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i data-lucide="mail" class="w-5 h-5"></i>
+                            </div>
+                            <input id="email" name="email" type="email" required
+                                class="input-large block w-full border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white shadow-sm"
+                                placeholder="you@example.com">
+                            <button type="button" onclick="speak('email')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-600 hover:text-teal-800"
+                                title="Listen to instruction">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p class="text-red-500 text-sm hidden mt-1" id="err-email">Valid email is required.</p>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label for="phone" class="block text-sm font-bold text-gray-700 mb-1">Phone Number</label>
+                        <div class="relative">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i data-lucide="phone" class="w-5 h-5"></i>
+                            </div>
+                            <input id="phone" name="phone" type="tel"
+                                class="input-large block w-full border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white shadow-sm"
+                                placeholder="+1 (555) 000-0000">
+                            <button type="button" onclick="speak('phone')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-600 hover:text-teal-800"
+                                title="Listen to instruction">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p class="text-red-500 text-sm hidden mt-1" id="err-phone">Phone number invalid.</p>
+                    </div>
+
+                    <!-- Location with Auto-Detect -->
+                    <div id="location-field-container">
+                        <label for="location" class="block text-sm font-bold text-gray-700 mb-1">Location <span
+                                class="text-gray-400 font-normal">(Village, District, Country)</span></label>
+                        <div class="relative">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i data-lucide="map-pin" class="w-5 h-5"></i>
+                            </div>
+                            <input id="location" name="location" type="text"
+                                class="input-large pr-32 block w-full border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white shadow-sm"
+                                placeholder="e.g. Sundarbans, India">
+
+                            <div
+                                class="absolute inset-y-0 right-10 flex items-center border-l pl-2 mr-2 border-gray-200">
+                                <button type="button" id="btn-gps"
+                                    class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1 px-2 rounded flex items-center border border-gray-300 transition-colors">
+                                    <i data-lucide="navigation" class="w-3.5 h-3.5 mr-1"></i> GPS
+                                </button>
+                            </div>
+                            <button type="button" onclick="speak('location')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-600 hover:text-teal-800"
+                                title="Listen to instruction">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p class="text-red-500 text-sm hidden mt-1" id="err-location">Location access denied. Please
+                            type manually.</p>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-bold text-gray-700 mb-1">Secure Password</label>
+                        <div class="relative">
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i data-lucide="lock" class="w-5 h-5"></i>
+                            </div>
+                            <input id="password" name="password" type="password" required
+                                class="input-large block w-full border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white shadow-sm"
+                                placeholder="••••••••">
+                            <button type="button" onclick="speak('password')"
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-600 hover:text-teal-800"
+                                title="Listen to instruction">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p class="text-red-500 text-sm hidden mt-1" id="err-password">Password too short. Minimum 6
+                            characters.</p>
+                    </div>
+
+                    <!-- Photo Upload (Optional) -->
+                    <div class="pt-2">
+                        <label for="photo" class="block text-sm font-bold text-gray-700 mb-1">Upload your photo <span
+                                class="text-gray-400 font-normal">(optional)</span></label>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative w-16 h-16 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden"
+                                id="photo-preview">
+                                <i data-lucide="camera" class="w-6 h-6 text-gray-400"></i>
+                            </div>
+                            <label
+                                class="cursor-pointer bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-50 text-sm transition-colors shadow-sm">
+                                Choose Photo
+                                <input type="file" name="photo" id="photo" accept="image/*" class="hidden">
+                            </label>
+                            <button type="button" onclick="speak('photo')"
+                                class="p-2 text-teal-600 hover:bg-teal-50 rounded-full" title="Listen to instruction">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6">
+                    <button type="submit"
+                        class="btn-gradient w-full flex justify-center py-4 px-4 text-white font-bold rounded-xl shadow-md text-lg transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-6 text-sm font-medium">
+                <span class="text-gray-600">Already have an account?</span>
+                <a href="/api/login" class="text-teal-600 hover:text-teal-700 ml-1 underline underline-offset-2">Sign
+                    in</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+
+        // Multi-language TTS Dictionary
+        const ttsMessages = {
+            'en': {
+                'name': "Please enter your full name in the box.",
+                'email': "Please enter your email address.",
+                'phone': "Enter your phone number starting with the country code.",
+                'location': "Enter your village and district, or press the GPS button to find it automatically.",
+                'password': "Create a strong password that you will remember.",
+                'photo': "You can upload a photo of yourself. This is optional.",
+                'detecting': "Detecting your location. Please wait.",
+                'loc_found': "Location found successfully.",
+                'loc_not_found': "Could not find city name. Please type it in.",
+                'loc_denied': "Location access denied. Please type your location manually.",
+                'form_error': "Please fix the errors in the form before submitting.",
+                'photo_loaded': "Photo loaded successfully."
+            },
+            'te': {
+                'name': "దయచేసి మీ పూర్తి పేరును నమోదు చేయండి.",
+                'email': "దయచేసి మీ ఈమెయిల్ అడ్రస్ నమోదు చేయండి.",
+                'phone': "దేశం కోడ్‌తో మీ ఫోన్ నంబర్‌ను నమోదు చేయండి.",
+                'location': "మీ గ్రామం మరియు జిల్లాను నమోదు చేయండి లేదా ఆటోమేటిక్‌గా కనుగొనడానికి GPS బటన్‌ను నొక్కండి.",
+                'password': "మీరు గుర్తుంచుకోగలిగే బలమైన పాస్‌వర్డ్‌ను సృష్టించండి.",
+                'photo': "మీరు మీ ఫోటోను అప్‌లోడ్ చేయవచ్చు. ఇది ఐచ్ఛికం.",
+                'detecting': "మీ స్థానాన్ని కనుగొంటున్నాము. దయచేసి వేచి ఉండండి.",
+                'loc_found': "స్థానం విజయవంతంగా కనుగొనబడింది.",
+                'loc_not_found': "నగరం పేరు కనుగొనబడలేదు. దయచేసి దాన్ని టైప్ చేయండి.",
+                'loc_denied': "స్థానం అనుమతి నిరాకరించబడింది. దయచేసి మీ స్థానాన్ని టైప్ చేయండి.",
+                'form_error': "సమర్పించే ముందు దయచేసి ఫారమ్‌లోని లోపాలను సరిచేయండి.",
+                'photo_loaded': "ఫోటో విజయవంతంగా లోడ్ చేయబడింది."
+            },
+            'hi': {
+                'name': "कृपया बॉक्स में अपना पूरा नाम दर्ज करें।",
+                'email': "कृपया अपना ईमेल पता दर्ज करें।",
+                'phone': "देश कोड के साथ अपना फोन नंबर दर्ज करें।",
+                'location': "अपना गांव और जिला दर्ज करें, या इसे स्वचालित रूप से खोजने के लिए जीपीएस बटन दबाएं।",
+                'password': "एक मजबूत पासवर्ड बनाएं जिसे आप याद रख सकें।",
+                'photo': "आप अपनी एक तस्वीर अपलोड कर सकते हैं। यह वैकल्पिक है।",
+                'detecting': "आपके स्थान का पता लगाया जा रहा है। कृपया प्रतीक्षा करें।",
+                'loc_found': "स्थान सफलतापूर्वक मिल गया।",
+                'loc_not_found': "शहर का नाम नहीं मिला। कृपया इसे टाइप करें।",
+                'loc_denied': "स्थान तक पहुंच अस्वीकृत कर दी गई है। कृपया अपना स्थान मैन्युअल रूप से टाइप करें।",
+                'form_error': "सबमिट करने से पहले कृपया फॉर्म में त्रुटियों को ठीक करें।",
+                'photo_loaded': "फोटो सफलतापूर्वक लोड हो गया।"
+            }
+        };
+
+        // Speech Synthesis Helper
+        function speak(key) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // stop previous
+                const langSelect = document.getElementById('lang-selector');
+                const selectedLang = langSelect.value || 'en';
+                const text = ttsMessages[selectedLang][key];
+
+                let msg = new SpeechSynthesisUtterance(text);
+
+                if (selectedLang === 'hi') msg.lang = 'hi-IN';
+                else if (selectedLang === 'te') msg.lang = 'te-IN';
+                else msg.lang = 'en-US';
+
+                msg.rate = 0.9; // slightly slower for readability
+                window.speechSynthesis.speak(msg);
+            } else {
+                alert('Text-to-speech not supported in this browser.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const roleBtns = document.querySelectorAll('.role-btn');
+            const roleInput = document.getElementById('role-input');
+            const locationContainer = document.getElementById('location-field-container');
+
+            // Role Selection UI Logic
+            roleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const selectedRole = btn.getAttribute('data-role');
+
+                    // Reset all
+                    roleBtns.forEach(b => {
+                        b.classList.remove('border-teal-500', 'bg-teal-50', 'text-teal-800');
+                        b.classList.add('border-gray-100', 'bg-white', 'text-gray-600');
+                        b.querySelector('p').classList.remove('text-teal-600/80');
+                        b.querySelector('p').classList.add('text-gray-500');
+                        b.querySelector('h3').classList.remove('text-teal-900');
+                        b.querySelector('h3').classList.add('text-gray-800');
+                        b.querySelector('.role-icon').classList.remove('text-teal-600');
+                        b.querySelector('.role-icon').classList.add('text-gray-400');
+                    });
+
+                    // Activate clicked
+                    btn.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-800');
+                    btn.classList.remove('border-gray-100', 'bg-white', 'text-gray-600');
+                    btn.querySelector('p').classList.add('text-teal-600/80');
+                    btn.querySelector('p').classList.remove('text-gray-500');
+                    btn.querySelector('h3').classList.add('text-teal-900');
+                    btn.querySelector('h3').classList.remove('text-gray-800');
+                    btn.querySelector('.role-icon').classList.remove('text-gray-400');
+                    btn.querySelector('.role-icon').classList.add('text-teal-600');
+
+                    // Set hidden input value
+                    roleInput.value = selectedRole;
+
+                    // Toggle location requirement
+                    if (selectedRole === 'farmer' || selectedRole === 'panchayat') {
+                        locationContainer.style.display = 'block';
+                    } else {
+                        locationContainer.style.display = 'block';
+                    }
+                });
+            });
+
+            // GPS Auto-detect Logic
+            const gpsBtn = document.getElementById('btn-gps');
+            const locationInput = document.getElementById('location');
+            const errLocation = document.getElementById('err-location');
+
+            gpsBtn.addEventListener('click', () => {
+                errLocation.classList.add('hidden');
+                speak('detecting');
+                gpsBtn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 mr-1 animate-spin"></i> Wait...`;
+                lucide.createIcons();
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            try {
+                                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                                const data = await response.json();
+                                if (data && data.display_name) {
+                                    // Make naming cleaner
+                                    let cleanName = [];
+                                    if (data.address.village) cleanName.push(data.address.village);
+                                    if (data.address.town) cleanName.push(data.address.town);
+                                    if (data.address.city) cleanName.push(data.address.city);
+                                    if (data.address.state_district) cleanName.push(data.address.state_district);
+                                    if (data.address.state) cleanName.push(data.address.state);
+                                    if (data.address.country) cleanName.push(data.address.country);
+
+                                    locationInput.value = cleanName.length > 0 ? cleanName.join(', ') : data.display_name.split(',').slice(0, 3).join(',');
+
+                                    speak('loc_found');
+                                } else {
+                                    throw new Error('No data');
+                                }
+                            } catch (e) {
+                                errLocation.textContent = "Could not fetch city name. Please type manually.";
+                                errLocation.classList.remove('hidden');
+                                speak('loc_not_found');
+                            } finally {
+                                gpsBtn.innerHTML = `<i data-lucide="navigation" class="w-3.5 h-3.5 mr-1"></i> GPS`;
+                                lucide.createIcons();
+                            }
+                        },
+                        (error) => {
+                            errLocation.textContent = "Location access denied. Please type manually.";
+                            errLocation.classList.remove('hidden');
+                            gpsBtn.innerHTML = `<i data-lucide="navigation" class="w-3.5 h-3.5 mr-1"></i> GPS`;
+                            lucide.createIcons();
+                            speak('loc_denied');
+                        }
+                    );
+                } else {
+                    errLocation.textContent = "Geolocation is not supported by this browser.";
+                    errLocation.classList.remove('hidden');
+                    gpsBtn.innerHTML = `<i data-lucide="navigation" class="w-3.5 h-3.5 mr-1"></i> GPS`;
+                    lucide.createIcons();
+                }
+            });
+
+            // Form Validation on Submit
+            const form = document.getElementById('register-form');
+            form.addEventListener('submit', (e) => {
+                let valid = true;
+
+                // Hide all errors
+                document.querySelectorAll('[id^="err-"]').forEach(el => el.classList.add('hidden'));
+
+                const name = document.getElementById('name').value;
+                if (!name || name.trim() === '') {
+                    document.getElementById('err-name').classList.remove('hidden');
+                    valid = false;
+                }
+
+                const email = document.getElementById('email').value;
+                if (!email || !email.includes('@')) {
+                    document.getElementById('err-email').classList.remove('hidden');
+                    valid = false;
+                }
+
+                const password = document.getElementById('password').value;
+                if (!password || password.length < 6) {
+                    document.getElementById('err-password').classList.remove('hidden');
+                    valid = false;
+                }
+
+                if (!valid) {
+                    e.preventDefault();
+                    speak('form_error');
+                }
+            });
+
+            // Photo Preview
+            const photoInput = document.getElementById('photo');
+            const photoPreview = document.getElementById('photo-preview');
+            photoInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        photoPreview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-full" />`;
+                        speak('photo_loaded');
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

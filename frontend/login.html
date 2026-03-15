@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - BlueCarbon Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#0d9488', secondary: '#2563eb' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    animation: { 'gradient-x': 'gradient-x 15s ease infinite' },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .hero-bg {
+            background-size: 400% 400%;
+            animation: gradient-x 15s ease infinite;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-large {
+            min-height: 48px;
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(to right, #0d9488, #2563eb);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            box-shadow: 0 0 20px rgba(13, 148, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .role-icon {
+            transition: transform 0.2s ease;
+        }
+
+        .group:hover .role-icon {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body class="hero-bg min-h-screen py-8 px-4 flex items-center justify-center relative overflow-x-hidden">
+
+    <!-- Decorative Floating Elements -->
+    <div class="absolute top-10 left-10 text-teal-200/20 w-32 h-32 blur-sm pointer-events-none">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+                d="M17.5,12A5.5,5.5,0,0,1,12,17.5V20.5A1.5,1.5,0,0,1,10.5,22H9a1,1,0,0,1,0-2h1.5v-2.586a7.493,7.493,0,0,1-3.6-7.82l.37-2.21a20.08,20.08,0,0,1,5.2-10A1,1,0,0,1,13,2.446a16.666,16.666,0,0,0-2.31,4.417c2.81-1.332,6.37-1.125,8.12,1.381A5.5,5.5,0,0,1,17.5,12Z" />
+        </svg>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="absolute top-4 right-4 z-20">
+        <div
+            class="flex items-center space-x-2 bg-black/30 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/10 hover:bg-black/40 transition-colors">
+            <i data-lucide="globe" class="w-4 h-4 text-white"></i>
+            <select id="lang-selector"
+                class="bg-transparent text-white text-sm focus:outline-none appearance-none cursor-pointer pr-4 font-medium">
+                <option value="en" class="text-black">English</option>
+                <option value="te" class="text-black">తెలుగు (Telugu)</option>
+                <option value="hi" class="text-black">हिंदी (Hindi)</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-3 h-3 text-white absolute right-3 pointer-events-none"></i>
+        </div>
+    </div>
+
+    <div class="w-full max-w-lg glass-card relative overflow-hidden flex flex-col pt-8 pb-10 px-8 sm:px-10">
+
+        <!-- Back button top left -->
+        <a href="index.html" class="absolute top-6 left-6 text-gray-400 hover:text-teal-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+
+        <div class="text-center mt-2 mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h2>
+            <p class="text-gray-500 mt-2">Sign in to your BlueCarbon account.</p>
+        </div>
+
+        <form id="login-form" action="/api/login" method="POST" class="space-y-6" novalidate>
+            <!-- Hidden Input for Role -->
+            <input type="hidden" name="role" id="role-input" value="farmer">
+
+            <!-- Big Role Selection -->
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-3 text-center">Sign in as</label>
+                <div class="grid grid-cols-2 gap-3 mb-2">
+                    <button type="button" data-role="farmer"
+                        class="role-btn border-2 border-teal-500 bg-teal-50 text-teal-800 p-3 rounded-xl flex flex-col items-center justify-center transition-all hover:bg-teal-100 hover:shadow-sm h-full group">
+                        <div class="mb-1 text-teal-600 font-bold role-icon">
+                            <i data-lucide="sprout" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-bold text-teal-900">Farmer/NGO</span>
+                    </button>
+                    <button type="button" data-role="panchayat"
+                        class="role-btn border-2 border-gray-100 bg-white text-gray-600 p-3 rounded-xl flex flex-col items-center justify-center transition-all hover:border-teal-300 hover:shadow-sm h-full group">
+                        <div class="mb-1 text-gray-400 font-bold role-icon">
+                            <i data-lucide="landmark" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-bold text-gray-800">Panchayat</span>
+                    </button>
+                    <button type="button" data-role="company"
+                        class="role-btn border-2 border-gray-100 bg-white text-gray-600 p-3 rounded-xl flex flex-col items-center justify-center transition-all hover:border-teal-300 hover:shadow-sm h-full group">
+                        <div class="mb-1 text-gray-400 font-bold role-icon">
+                            <i data-lucide="building-2" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-bold text-gray-800">Company</span>
+                    </button>
+                    <button type="button" data-role="admin"
+                        class="role-btn border-2 border-gray-100 bg-white text-gray-600 p-3 rounded-xl flex flex-col items-center justify-center transition-all hover:border-teal-300 hover:shadow-sm h-full group">
+                        <div class="mb-1 text-gray-400 font-bold role-icon">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-bold text-gray-800">Admin</span>
+                    </button>
+                </div>
+            </div>
+
+            <hr class="border-gray-100 my-4">
+
+            <!-- Input Fields with Icons and Voice Help -->
+            <div class="space-y-4">
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-bold text-gray-700 mb-1">Email address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i data-lucide="mail" class="w-5 h-5"></i>
+                        </div>
+                        <input id="email" name="email" type="email" required
+                            class="input-large block w-full border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white shadow-sm"
+                            placeholder="you@example.com">
+                        <button type="button" onclick="speak('email')"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-600 hover:text-teal-800"
+                            title="Listen to instruction">
+                            <i data-lucide="volume-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <p class="text-red-500 text-sm hidden mt-1" id="err-email">Valid email is required.</p>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="password" class="block text-sm font-bold text-gray-700">Password</label>
+                        <a href="#"
+                            class="text-xs font-medium text-teal-600 hover:text-teal-700 underline underline-offset-2">Forgot
+                            password?</a>
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required
+                            class="input-large block w-full border border-gray-300 rounded-xl focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white shadow-sm"
+                            placeholder="••••••••">
+                        <button type="button" onclick="speak('password')"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-teal-600 hover:text-teal-800"
+                            title="Listen to instruction">
+                            <i data-lucide="volume-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <p class="text-red-500 text-sm hidden mt-1" id="err-password">Password is required.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center">
+                <input id="remember-me" name="remember-me" type="checkbox"
+                    class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
+                <label for="remember-me" class="ml-2 block text-sm font-medium text-gray-700">
+                    Remember me
+                </label>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit"
+                    class="btn-gradient w-full flex justify-center py-4 px-4 text-white font-bold rounded-xl shadow-md text-lg transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    Sign In
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-6 text-sm font-medium">
+            <span class="text-gray-600">Don't have an account?</span>
+            <a href="/api/register" class="text-teal-600 hover:text-teal-700 ml-1 underline underline-offset-2">Create
+                one</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+
+        // Multi-language TTS Dictionary
+        const ttsMessages = {
+            'en': {
+                'email': "Please enter your email address to sign in.",
+                'password': "Enter your account password.",
+                'form_error': "Please enter your email and password before signing in."
+            },
+            'te': {
+                'email': "సైన్ ఇన్ చేయడానికి దయచేసి మీ ఈమెయిల్ అడ్రస్‌ను నమోదు చేయండి.",
+                'password': "మీ ఖాతా పాస్‌వర్డ్‌ను నమోదు చేయండి.",
+                'form_error': "దయచేసి సైన్ ఇన్ చేయడానికి ముందు మీ ఈమెయిల్ మరియు పాస్‌వర్డ్‌ను నమోదు చేయండి."
+            },
+            'hi': {
+                'email': "साइन इन करने के लिए कृपया अपना ईमेल पता दर्ज करें।",
+                'password': "अपना खाता पासवर्ड दर्ज करें।",
+                'form_error': "साइन इन करने से पहले कृपया अपना ईमेल और पासवर्ड दर्ज करें।"
+            }
+        };
+
+        // Speech Synthesis Helper
+        function speak(key) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // stop previous
+                const langSelect = document.getElementById('lang-selector');
+                const selectedLang = langSelect.value || 'en';
+                const text = ttsMessages[selectedLang][key];
+
+                let msg = new SpeechSynthesisUtterance(text);
+
+                if (selectedLang === 'hi') msg.lang = 'hi-IN';
+                else if (selectedLang === 'te') msg.lang = 'te-IN';
+                else msg.lang = 'en-US';
+
+                msg.rate = 0.9; // slightly slower for readability
+                window.speechSynthesis.speak(msg);
+            } else {
+                alert('Text-to-speech not supported in this browser.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const roleBtns = document.querySelectorAll('.role-btn');
+            const roleInput = document.getElementById('role-input');
+
+            // Role Selection UI Logic
+            roleBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const selectedRole = btn.getAttribute('data-role');
+
+                    // Reset all
+                    roleBtns.forEach(b => {
+                        b.classList.remove('border-teal-500', 'bg-teal-50', 'text-teal-800');
+                        b.classList.add('border-gray-100', 'bg-white', 'text-gray-600');
+                        b.querySelector('span').classList.remove('text-teal-900');
+                        b.querySelector('span').classList.add('text-gray-800');
+                        b.querySelector('.role-icon').classList.remove('text-teal-600');
+                        b.querySelector('.role-icon').classList.add('text-gray-400');
+                    });
+
+                    // Activate clicked
+                    btn.classList.add('border-teal-500', 'bg-teal-50', 'text-teal-800');
+                    btn.classList.remove('border-gray-100', 'bg-white', 'text-gray-600');
+                    btn.querySelector('span').classList.add('text-teal-900');
+                    btn.querySelector('span').classList.remove('text-gray-800');
+                    btn.querySelector('.role-icon').classList.remove('text-gray-400');
+                    btn.querySelector('.role-icon').classList.add('text-teal-600');
+
+                    // Set hidden input value
+                    roleInput.value = selectedRole;
+                });
+            });
+
+            // Form Validation on Submit
+            const form = document.getElementById('login-form');
+            form.addEventListener('submit', (e) => {
+                let valid = true;
+
+                // Hide all errors
+                document.querySelectorAll('[id^="err-"]').forEach(el => el.classList.add('hidden'));
+
+                const email = document.getElementById('email').value;
+                if (!email || !email.includes('@')) {
+                    document.getElementById('err-email').classList.remove('hidden');
+                    valid = false;
+                }
+
+                const password = document.getElementById('password').value;
+                if (!password || password.trim() === '') {
+                    document.getElementById('err-password').classList.remove('hidden');
+                    valid = false;
+                }
+
+                if (!valid) {
+                    e.preventDefault();
+                    speak('form_error');
+                    return;
+                }
+
+                // If running locally without backend, allow testing links
+                if (window.location.protocol === 'file:') {
+                    e.preventDefault();
+                    const role = roleInput.value;
+                    if (role === 'farmer') window.location.href = 'farmer/dashboard.html';
+                    else if (role === 'panchayat') window.location.href = 'panchayat/verification.html';
+                    else if (role === 'company') window.location.href = 'company/marketplace.html';
+                    else if (role === 'admin') window.location.href = 'admin/approvals.html';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

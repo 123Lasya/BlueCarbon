@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovAdmin Portal - BlueCarbon Ledger</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 900: '#14532d' },
+                        surface: { 50: '#f8fafc', 100: '#f1f5f9', 800: '#1e293b', 900: '#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .leaflet-popup-content-wrapper {
+            padding: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            width: 260px !important;
+        }
+
+        .marker-icon-custom {
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="bg-surface-50 flex h-screen overflow-hidden text-slate-800">
+
+        <!-- Sidebar -->
+    <aside class="w-64 glass-dark text-white hidden md:flex flex-col relative z-20">
+        <div class="p-8 border-b border-white/10 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <i data-lucide="leaf" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+                <span class="font-bold text-lg tracking-tight leading-none block">GovAdmin</span>
+                <span class="text-xs text-slate-400 font-medium tracking-wider uppercase">Portal</span>
+            </div>
+        </div>
+        <nav class="flex-1 px-4 space-y-1.5 mt-6 relative z-10">
+            <a href="/api/admin/dashboard" class="flex items-center gap-3 px-4 py-3.5 bg-brand-500/10 rounded-2xl text-brand-400 font-semibold transition-all group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5  transition-colors"></i> Overview & Map
+            </a>
+            <a href="/api/admin/credit-requests" class="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 rounded-2xl text-slate-300 font-medium transition-all group">
+                <i data-lucide="file-text" class="w-5 h-5 group-hover:text-white transition-colors"></i> Credit Requests
+            </a>
+            <a href="/api/admin/analytics" class="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 rounded-2xl text-slate-300 font-medium transition-all group">
+                <i data-lucide="bar-chart-2" class="w-5 h-5 group-hover:text-white transition-colors"></i> Analytics
+            </a>
+            <a href="/api/admin/map" class="flex items-center gap-3 px-4 py-3.5 hover:bg-white/5 rounded-2xl text-slate-300 font-medium transition-all group">
+                <i data-lucide="map" class="w-5 h-5 group-hover:text-white transition-colors"></i> National Map View
+            </a>
+        </nav>
+
+        <!-- User Profile Area -->
+        <div class="p-6 border-t border-white/10">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-sm font-bold text-slate-300">
+                        AD
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-white leading-tight">Admin User</p>
+                        <p class="text-xs text-slate-400">Government Node</p>
+                    </div>
+                </div>
+                <a href="/api/login" class="text-slate-400 hover:text-red-400 transition-colors p-2 rounded-lg hover:bg-white/5" title="Sign Out">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto relative h-full w-full">
+        <!-- Top Nav / Header -->
+        <header
+            class="sticky top-0 z-40 glass-panel border-b border-slate-200 px-8 py-5 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">National Overview</h1>
+                <p class="text-sm text-slate-500 font-medium mt-0.5">Manage carbon projects and environmental assets.
+                </p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500 hover:text-brand-600 transition-colors">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-7xl mx-auto space-y-10">
+
+            <!-- Verification Queue -->
+            <section class="mb-12">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                            <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-600"></i> Action Required: Final
+                            Approvals
+                        </h2>
+                        <p class="text-sm text-slate-500 font-medium mt-1">Cross-reference farmer submissions against
+                            Panchayat field evidence.</p>
+                    </div>
+                    <div
+                        class="bg-brand-50 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-full border border-brand-200">
+                        {{ projects|length }} Pending
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    {% if projects %}
+                    {% for project in projects %}
+                    <div
+                        class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden transform transition-all hover:shadow-md hover:border-slate-300">
+                        <!-- Grid Comparison Layout -->
+                        <div
+                            class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
+
+                            <!-- Farmer Data -->
+                            <div class="p-8">
+                                <div class="flex items-center justify-between mb-6">
+                                    <span
+                                        class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Farmer
+                                        Submission</span>
+                                    <span class="text-sm text-slate-400 font-medium">{{ project.created_at|date:"M d, Y" }}</span>
+                                </div>
+
+                                <h3 class="text-2xl font-bold text-slate-900 mb-1 tracking-tight">{{ project.project_name }}</h3>
+                                <p class="text-slate-500 text-sm font-medium mb-6 flex items-center gap-1.5">
+                                    <i data-lucide="user" class="w-4 h-4 text-slate-400"></i> {{ project.farmer.name }}
+                                </p>
+
+                                <div class="bg-slate-50 rounded-2xl p-5 space-y-4 text-sm font-medium">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                        <span class="text-slate-500">Location</span>
+                                        <span class="text-slate-900">{{ project.location }}</span>
+                                    </div>
+                                    <div class="h-px bg-slate-200"></div>
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                        <span class="text-slate-500">Total Area</span>
+                                        <span class="text-slate-900">{{ project.plantation_area }} ha</span>
+                                    </div>
+                                    <div class="h-px bg-slate-200"></div>
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                        <span class="text-slate-500">Species</span>
+                                        <span class="text-slate-900">{{ project.species }}</span>
+                                    </div>
+                                    <div class="h-px bg-slate-200"></div>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-slate-500">GPS Trace</span>
+                                        <span
+                                            class="font-mono text-slate-700 bg-white border border-slate-200 px-2 py-1.5 rounded-lg text-xs leading-relaxed break-all block">{{ project.description }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6">
+                                    {% if project.projectimage_set.first %}
+                                    <span
+                                        class="text-xs uppercase tracking-widest font-bold text-slate-400 block mb-2">Original
+                                        Evidence</span>
+                                    <img src="/media/{{ project.projectimage_set.first.image_file }}"
+                                        class="w-full h-40 object-cover rounded-2xl border border-slate-200 shadow-sm"
+                                        alt="Farmer submission">
+                                    {% else %}
+                                    <div
+                                        class="w-full h-40 bg-slate-50 rounded-2xl border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
+                                        <i data-lucide="image-off" class="w-6 h-6 mb-2"></i>
+                                        <span class="text-xs font-semibold">No Image Provided</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Panchayat Data -->
+                            <div class="p-8 bg-surface-50">
+                                <div class="flex items-center justify-between mb-6">
+                                    <span
+                                        class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Panchayat
+                                        Verification</span>
+                                    <span class="text-sm text-slate-400 font-medium">{{ project.panchayatverificationevidence_set.first.timestamp|date:"M d, Y" }}</span>
+                                </div>
+
+                                <h3 class="text-lg font-bold text-slate-900 mb-1 tracking-tight">Field Assessment</h3>
+                                <p class="text-slate-500 text-sm font-medium mb-6 flex items-center gap-1.5">
+                                    <i data-lucide="badge-check" class="w-4 h-4 text-emerald-500"></i> Officer: {{ project.panchayatverificationevidence_set.first.officer.name }}
+                                </p>
+
+                                <div
+                                    class="bg-white rounded-2xl p-5 space-y-4 text-sm font-medium border border-slate-200 shadow-sm">
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                        <span class="text-slate-500">Verified Area</span>
+                                        <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">{{ project.plantation_area }} ha</span>
+                                    </div>
+                                    <div class="h-px bg-slate-100"></div>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-slate-500">GPS Match</span>
+                                        {% with ev=project.panchayatverificationevidence_set.first %}
+                                        <span
+                                            class="font-mono text-slate-700 bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100 text-xs block break-all">
+                                            {% if ev.latitude %}
+                                            {{ ev.latitude }}, {{ ev.longitude }}
+                                            {% else %}
+                                            Verified identical to submission
+                                            {% endif %}
+                                        </span>
+                                        {% endwith %}
+                                    </div>
+                                    <div class="h-px bg-slate-100"></div>
+                                    <div class="flex flex-col gap-2">
+                                        <span class="text-slate-500">Panchayat Comments</span>
+                                        <div
+                                            class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-700 text-sm italic">
+                                            "Matches guidelines perfectly. Full canopy growth observed during local site
+                                            visit."
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6">
+                                    <span
+                                        class="text-xs uppercase tracking-widest font-bold text-slate-400 block mb-2">Field
+                                        Officer Photo</span>
+                                    {% with ev=project.panchayatverificationevidence_set.first %}
+                                    {% if ev and ev.image %}
+                                    <img src="/media/{{ ev.image }}"
+                                        class="w-full h-40 object-cover rounded-2xl border border-slate-200 shadow-sm"
+                                        alt="Panchayat field photo">
+                                    {% else %}
+                                    <div
+                                        class="w-full h-40 bg-white rounded-2xl border border-slate-200 border-dashed flex flex-col items-center justify-center text-slate-400">
+                                        <i data-lucide="camera-off" class="w-6 h-6 mb-2"></i>
+                                        <span class="text-xs font-semibold">No Photo Uploaded</span>
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer: Actions & AI Score -->
+                        <div
+                            class="p-6 border-t border-slate-100 bg-white flex flex-col md:flex-row justify-between items-center gap-6">
+
+                            <!-- AI Confidence Engine -->
+                            <div
+                                class="flex items-center gap-4 group relative cursor-help bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200 hover:border-slate-300 transition-colors shrink-0">
+                                <div
+                                    class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-white tracking-tight shadow-md {% if project.ai_score >= 85 %} bg-gradient-to-br from-emerald-400 to-emerald-600 {% elif project.ai_score >= 60 %} bg-gradient-to-br from-amber-400 to-amber-600 {% else %} bg-gradient-to-br from-red-400 to-red-600 {% endif %}">
+                                    {{ project.ai_score }}<span class="text-[10px] opacity-80">%</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900 leading-tight">AI Confidence</p>
+                                    <p class="text-xs text-slate-500 font-medium">Sat-Sentinel + Data Mesh</p>
+                                </div>
+                                <!-- Tooltip -->
+                                <div
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-3 bg-slate-800 text-white text-xs font-medium rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10 text-center pointer-events-none">
+                                    Algorithmic similarity score between farmer submission, panchayat field
+                                    verification, and historical AI satellite prediction models.
+                                    <div
+                                        class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 rotate-45">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                <button type="button"
+                                    onclick="openRejectModal('{{ project.id }}', '{{ project.project_name|escapejs }}')"
+                                    class="flex-1 sm:flex-none px-6 py-3 text-sm font-bold text-red-600 bg-white hover:bg-red-50 border border-red-200 hover:border-red-300 rounded-xl transition-all text-center tracking-tight shadow-sm whitespace-nowrap">
+                                    Reject Application
+                                </button>
+                                <form action="/api/admin/approve" method="POST" class="flex-1 sm:flex-none m-0">
+                                    <input type="hidden" name="id" value="{{ project.id }}">
+                                    <button type="submit"
+                                        class="w-full relative overflow-hidden group px-8 py-3 text-sm font-bold text-white rounded-xl shadow-lg shadow-brand-500/30 transition-all font-['Outfit'] whitespace-nowrap">
+                                        <div
+                                            class="absolute inset-0 bg-gradient-to-r from-brand-600 to-brand-500 group-hover:from-brand-500 group-hover:to-brand-400 transition-all">
+                                        </div>
+                                        <span class="relative flex items-center justify-center gap-2">
+                                            Approve Asset <i data-lucide="arrow-right"
+                                                class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                        </span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div
+                        class="bg-white rounded-3xl p-16 text-center border border-slate-200 shadow-sm flex flex-col items-center">
+                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                            <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 tracking-tight">Queue is Clear</h3>
+                        <p class="text-slate-500 font-medium mt-2 max-w-sm">You've successfully processed all pending
+                            verification items.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- Approved Projects -->
+            <section>
+                <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center tracking-tight">
+                    <i data-lucide="check-circle" class="w-5 h-5 mr-2 text-emerald-500"></i> Approved Projects
+                </h2>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-slate-100">
+                        <thead class="bg-surface-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Project Name</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Farmer</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Location</th>
+                                <th
+                                    class="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Approval Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for ap in approved_projects %}
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-emerald-700">{{ ap.project_name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{{ ap.farmer.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">{{ ap.location }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-400 text-right">{{ ap.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-10 text-center text-sm font-medium text-slate-400">No
+                                    approved projects yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Rejected List -->
+            <section class="mt-16 pb-12">
+                <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center tracking-tight">
+                    <i data-lucide="history" class="w-5 h-5 mr-2 text-slate-400"></i> Prior Rejections
+                </h2>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-slate-100">
+                        <thead class="bg-surface-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Farmer</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Location</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Failure Reason</th>
+                                <th
+                                    class="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for rp in rejected_projects %}
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{{ rp.farmer.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500">{{ rp.location }}</td>
+                                <td class="px-6 py-4 text-sm text-red-600 font-semibold max-w-md truncate">
+                                    {% if rp.verification_set.last %}
+                                    {{ rp.verification_set.last.rejection_reason|default:rp.verification_set.last.comments }}
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-400 text-right">{{ rp.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-10 text-center text-sm font-medium text-slate-400">No
+                                    recent rejections recorded in the system.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal"
+        class="hidden fixed inset-0 z-[2000] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-all opacity-0">
+        <div
+            class="bg-white rounded-3xl shadow-2xl w-11/12 max-w-lg overflow-hidden transform scale-95 transition-all duration-200 border border-slate-100">
+            <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-red-50/30">
+                <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2 tracking-tight">
+                    <i data-lucide="alert-circle" class="w-6 h-6 text-red-500"></i>
+                    Reject <span id="modalProjectName" class="text-red-600 ml-1"></span>
+                </h3>
+                <button onclick="closeRejectModal()"
+                    class="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-full hover:bg-slate-100">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form action="/api/admin/reject" method="POST" enctype="multipart/form-data" class="p-8">
+                <input type="hidden" name="id" id="modalProjectId">
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Rejection Reason <span
+                                class="text-red-500">*</span></label>
+                        <textarea name="reason" rows="2" required
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 text-sm font-medium transition-all"
+                            placeholder="State the primary violation..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Internal Notes</label>
+                        <textarea name="notes" rows="3"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 text-sm font-medium transition-all"
+                            placeholder="Add context for auditors..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Upload Evidence (Optional)</label>
+                        <div
+                            class="flex justify-center px-6 pt-5 pb-6 border-2 border-slate-200 border-dashed rounded-xl hover:bg-slate-50/50 transition-colors cursor-pointer group">
+                            <div class="space-y-1 text-center">
+                                <i data-lucide="upload-cloud"
+                                    class="mx-auto h-8 w-8 text-slate-400 group-hover:text-brand-500 transition-colors"></i>
+                                <div class="flex justify-center text-sm text-slate-600 mt-2">
+                                    <label
+                                        class="relative cursor-pointer bg-transparent rounded-md font-bold text-brand-600 hover:text-brand-500 focus-within:outline-none">
+                                        <span>Click to upload</span>
+                                        <input name="evidence" type="file" class="sr-only" accept="image/*,.pdf">
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-slate-400 font-medium">PNG, JPG, PDF up to 10MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-8">
+                    <button type="button" onclick="closeRejectModal()"
+                        class="px-6 py-2.5 text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors">Cancel</button>
+                    <button type="submit"
+                        class="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors shadow-sm shadow-red-600/20">Confirm
+                        Rejection</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        lucide.createIcons();
+
+        // Modal Logic
+        const modal = document.getElementById('rejectModal');
+        const modalInner = modal.querySelector('div');
+
+        function openRejectModal(id, name) {
+            document.getElementById('modalProjectId').value = id;
+            document.getElementById('modalProjectName').textContent = name;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalInner.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeRejectModal() {
+            modal.classList.add('opacity-0');
+            modalInner.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Map logic removed
+    </script>
+</body>
+
+</html>

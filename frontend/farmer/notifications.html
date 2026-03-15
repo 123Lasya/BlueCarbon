@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - BlueCarbon Ledger</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#0d9488' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-full relative z-20">
+        <div class="p-6 flex items-center mb-6">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <a href="/api/farmer/dashboard"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> <span
+                    data-i18n="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="/api/projects"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_submit">Submit
+                    Project</span>
+            </a>
+            <a href="/api/farmer/projects"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="layers" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_my_projects">My Projects</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/api/login"
+                class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_signout">Sign Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 flex items-center justify-between p-4">
+        <div class="flex items-center">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <button id="mobile-menu-toggle" class="text-gray-600 focus:outline-none">
+            <i data-lucide="menu" class="h-6 w-6"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden mt-16 md:mt-0 relative z-10 w-full">
+        <!-- Topbar -->
+        <header
+            class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm hidden md:flex">
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl font-bold text-gray-900" data-i18n="page_title">Your Notifications</h1>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <!-- Language Selector -->
+                <div
+                    class="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus-within:ring-2 focus-within:ring-teal-500 transition-all">
+                    <i data-lucide="globe" class="w-4 h-4 text-gray-500 mr-2"></i>
+                    <select id="lang-selector"
+                        class="bg-transparent text-sm font-medium text-gray-700 focus:outline-none cursor-pointer pr-2">
+                        <option value="en">English (EN)</option>
+                        <option value="hi">हिंदी (HI)</option>
+                        <option value="te">తెలుగు (TE)</option>
+                    </select>
+                </div>
+
+                <button class="text-teal-600 relative">
+                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                </button>
+                <div class="h-8 w-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold">
+                    RS</div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+
+            <!-- Global Voice Help FAB -->
+            <button onclick="speak('page_help')"
+                class="fixed bottom-8 right-8 bg-teal-600 text-white rounded-full p-4 shadow-lg hover:bg-teal-700 hover:scale-105 transition-all z-40 flex items-center justify-center group"
+                title="Voice Help">
+                <i data-lucide="mic" class="w-6 h-6 animate-pulse group-hover:animate-none"></i>
+            </button>
+
+            <div class="md:hidden mb-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900" data-i18n="page_title">Your Notifications</h1>
+                <!-- Mobile Language Dropdown -->
+                <select id="mobile-lang-selector"
+                    class="text-sm bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 font-medium focus:outline-none">
+                    <option value="en">EN</option>
+                    <option value="hi">HI</option>
+                    <option value="te">TE</option>
+                </select>
+            </div>
+
+            <div class="max-w-4xl mx-auto space-y-4">
+
+                <!-- Notification Card 1 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex items-start space-x-4">
+                    <div class="p-3 bg-green-50 text-green-600 rounded-2xl">
+                        <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-base font-bold text-gray-900" data-i18n="notif_1_title">Project Approved
+                            </h3>
+                            <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">2 days
+                                ago</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="notif_1_desc">Your "Mahanadi Delta" project was
+                            officially verified by the Panchayat using our AI biomass estimation via satellite data.</p>
+                    </div>
+                </div>
+
+                <!-- Notification Card 2 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex items-start space-x-4">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                        <i data-lucide="coins" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-base font-bold text-gray-900" data-i18n="notif_2_title">Credits Sold
+                                Successfully</h3>
+                            <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">1 week
+                                ago</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="notif_2_desc">A company named EcoCorp purchased
+                            500 carbon credit tokens generated from your Sundarbans Sector A plantation.</p>
+                    </div>
+                </div>
+
+                <!-- Notification Card 3 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex items-start space-x-4">
+                    <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-base font-bold text-gray-900" data-i18n="notif_3_title">Verification Pending
+                            </h3>
+                            <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">2 weeks
+                                ago</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="notif_3_desc">You successfully submitted the
+                            "Krishna Godavari Basin" extension. It is currently awaiting manual review by the local
+                            Panchayat.</p>
+                    </div>
+                </div>
+
+                <!-- Notification Card 4 -->
+                <div
+                    class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex items-start space-x-4">
+                    <div class="p-3 bg-red-50 text-red-600 rounded-2xl">
+                        <i data-lucide="x-circle" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="text-base font-bold text-gray-900" data-i18n="notif_4_title">Project Rejected
+                            </h3>
+                            <span class="text-xs font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">1 month
+                                ago</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="notif_4_desc">The project "Coastal Zone 4" was
+                            rejected due to a satellite boundary mismatch. Please resubmit clear GPS coordinates.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Mobile Slide-out Menu backdrop -->
+    <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-gray-900/50 z-40 hidden md:hidden"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+
+        // -------------------------------------------------------------
+        // I18N AND TEXT-TO-SPEECH DICTIONARY
+        // -------------------------------------------------------------
+        const translations = {
+            'en': {
+                'nav_dashboard': "Dashboard",
+                'nav_submit': "Submit Project",
+                'nav_my_projects': "My Projects",
+                'nav_signout': "Sign Out",
+                'page_title': "Your Notifications",
+                // Notif 1
+                'notif_1_title': "Project Approved",
+                'notif_1_desc': "Your 'Mahanadi Delta' project was officially verified by the Panchayat using our AI biomass estimation via satellite data.",
+                // Notif 2
+                'notif_2_title': "Credits Sold Successfully",
+                'notif_2_desc': "A company named EcoCorp purchased 500 carbon credit tokens generated from your Sundarbans Sector A plantation.",
+                // Notif 3
+                'notif_3_title': "Verification Pending",
+                'notif_3_desc': "You successfully submitted the 'Krishna Godavari Basin' extension. It is currently awaiting manual review by the local Panchayat.",
+                // Notif 4
+                'notif_4_title': "Project Rejected",
+                'notif_4_desc': "The project 'Coastal Zone 4' was rejected due to a satellite boundary mismatch. Please resubmit clear GPS coordinates.",
+                // TTS
+                'page_help': "This page shows your recent alerts. You have approvals, sales, pending verifications, and rejections listed chronologically."
+            },
+            'hi': {
+                'nav_dashboard': "डैशबोर्ड",
+                'nav_submit': "नया प्रोजेक्ट जोड़ें",
+                'nav_my_projects': "मेरे प्रोजेक्ट्स",
+                'nav_signout': "लॉग आउट",
+                'page_title': "आपकी सूचनाएं",
+                // Notif 1
+                'notif_1_title': "प्रोजेक्ट स्वीकृत",
+                'notif_1_desc': "आपका 'महानदी डेल्टा' प्रोजेक्ट आधिकारिक तौर पर हमारे एआई उपग्रह डेटा के माध्यम से पंचायत द्वारा सत्यापित किया गया था।",
+                // Notif 2
+                'notif_2_title': "क्रेडिट सफलतापूर्वक बेचे गए",
+                'notif_2_desc': "इकोकॉर्प नामक कंपनी ने आपके सुंदरवन सेक्टर ए वृक्षारोपण से उत्पन्न 500 कार्बन क्रेडिट टोकन खरीदे।",
+                // Notif 3
+                'notif_3_title': "सत्यापन लंबित",
+                'notif_3_desc': "आपने सफलतापूर्वक 'कृष्णा गोदावरी बेसिन' एक्सटेंशन सबमिट कर दिया। यह वर्तमान में पंचायत द्वारा समीक्षा की प्रतीक्षा कर रहा है।",
+                // Notif 4
+                'notif_4_title': "प्रोजेक्ट अस्वीकृत",
+                'notif_4_desc': "उपग्रह सीमा बेमेल होने के कारण 'तटीय क्षेत्र 4' प्रोजेक्ट को अस्वीकार कर दिया गया था। कृपया स्पष्ट जीपीएस निर्देशांक पुनः सबमिट करें।",
+                // TTS
+                'page_help': "यह पृष्ठ आपके हालिया अलर्ट दिखाता है। आपके पास कालानुक्रमिक रूप से सूचीबद्ध अनुमोदन, बिक्री, लंबित सत्यापन और अस्वीकृतियां हैं।"
+            },
+            'te': {
+                'nav_dashboard': "డాష్‌బోర్డ్",
+                'nav_submit': "కొత్త ప్రాజెక్ట్‌ను సమర్పించండి",
+                'nav_my_projects': "నా ప్రాజెక్ట్‌లు",
+                'nav_signout': "సైన్ అవుట్",
+                'page_title': "మీ నోటిఫికేషన్‌లు",
+                // Notif 1
+                'notif_1_title': "ప్రాజెక్ట్ ఆమోదించబడింది",
+                'notif_1_desc': "మీ 'మహానది డెల్టా' ప్రాజెక్ట్ ఉపగ్రహ డేటా ద్వారా మా AI అంచనాను ఉపయోగించి పంచాయతీ ద్వారా అధికారికంగా ధృవీకరించబడింది.",
+                // Notif 2
+                'notif_2_title': "క్రెడిట్‌లు విజయవంతంగా విక్రయించబడ్డాయి",
+                'notif_2_desc': "ఎకోకార్ప్ అనే కంపెనీ మీ సుందర్బన్స్ సెక్టార్ A తోటల పెంపకం ద్వారా ఉత్పత్తి చేయబడిన 500 కార్బన్ క్రెడిట్ టోకెన్‌లను కొనుగోలు చేసింది.",
+                // Notif 3
+                'notif_3_title': "ధృవీకరణ పెండింగ్‌లో ఉంది",
+                'notif_3_desc': "మీరు 'కృష్ణా గోదావరి బేసిన్' పొడిగింపును విజయవంతంగా సమర్పించారు. ఇది ప్రస్తుతం స్థానిక పంచాయతీ ద్వారా మాన్యువల్ సమీక్ష కోసం వేచి ఉంది.",
+                // Notif 4
+                'notif_4_title': "ప్రాజెక్ట్ తిరస్కరించబడింది",
+                'notif_4_desc': "ఉపగ్రహ సరిహద్దు సరిపోలకపోవడం వల్ల 'తీరప్రాంతం 4' ప్రాజెక్ట్ తిరస్కరించబడింది. దయచేసి స్పష్టమైన GPS అక్షాంశ రేఖాంశాలను మళ్లీ సమర్పించండి.",
+                // TTS
+                'page_help': "ఈ పేజీ మీ ఇటీవలి హెచ్చరికలను చూపుతుంది. మీరు ఆమోదాలు, అమ్మకాలు, పెండింగ్ ధృవీకరణలు మరియు తిరస్కరణలను కాలానుక్రమంగా జాబితా చేసారు."
+            }
+        };
+
+        // Language State Management
+        let currentLang = localStorage.getItem('farmer_lang') || 'en';
+
+        function updateUIText() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
+                }
+            });
+            document.getElementById('lang-selector').value = currentLang;
+            document.getElementById('mobile-lang-selector').value = currentLang;
+        }
+
+        // Dropdown Handlers
+        document.getElementById('lang-selector').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('farmer_lang', currentLang);
+            updateUIText();
+        });
+
+        document.getElementById('mobile-lang-selector').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            localStorage.setItem('farmer_lang', currentLang);
+            updateUIText();
+        });
+
+        // Speech Synthesis Helper
+        function speak(key) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = translations[currentLang][key];
+                let msg = new SpeechSynthesisUtterance(text);
+
+                if (currentLang === 'hi') msg.lang = 'hi-IN';
+                else if (currentLang === 'te') msg.lang = 'te-IN';
+                else msg.lang = 'en-US';
+
+                msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            } else {
+                alert('Text-to-speech not supported in this browser.');
+            }
+        }
+
+        // Initialize UI
+        updateUIText();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile menu logic
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.querySelector('aside');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                sidebar.classList.toggle('absolute');
+                sidebar.classList.toggle('left-0');
+                sidebar.classList.toggle('top-0');
+                sidebar.classList.toggle('h-full');
+                sidebar.classList.toggle('z-50');
+                backdrop.classList.toggle('hidden');
+            });
+            backdrop.addEventListener('click', () => {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('absolute', 'left-0', 'top-0', 'h-full', 'z-50');
+                backdrop.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+
+</html>

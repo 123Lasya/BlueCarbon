@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Farmers - BlueCarbon Ledger</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d9488',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-full relative z-20">
+        <div class="p-6 flex items-center mb-6">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon Ledger</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <a href="/api/panchayat/dashboard"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="clipboard-check" class="w-5 h-5 mr-3"></i> Verification Queue
+            </a>
+            <a href="/api/panchayat/village-map"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="map" class="w-5 h-5 mr-3"></i> Village Map
+            </a>
+            <a href="/api/panchayat/local-farmers"
+                class="flex items-center px-4 py-3 bg-teal-50 text-teal-700 rounded-xl font-medium transition-colors">
+                <i data-lucide="users" class="w-5 h-5 mr-3"></i> Local Farmers
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/api/login"
+                class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 flex items-center justify-between p-4">
+        <div class="flex items-center">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <button id="mobile-menu-toggle" class="text-gray-600 focus:outline-none">
+            <i data-lucide="menu" class="h-6 w-6"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden mt-16 md:mt-0 relative z-10 w-full">
+        <!-- Topbar -->
+        <header
+            class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm hidden md:flex">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Local Farmers Directory</h1>
+                <p class="text-sm text-gray-500">Contact and view project statuses of enrolled farmers</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button type="button" onclick="speakHelp()"
+                    class="flex items-center px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-sm font-semibold hover:bg-teal-100 transition-colors mr-2">
+                    <i data-lucide="volume-2" class="w-4 h-4 mr-2"></i> Voice Help
+                </button>
+                <div class="h-8 w-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">
+                    GP
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-4 md:p-8 overflow-y-auto">
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full whitespace-nowrap">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Farmer Name</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Village / District</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Phone Number</th>
+                                <th
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Joined</th>
+                                <th
+                                    class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            {% for farmer in farmers %}
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="h-10 w-10 flex-shrink-0 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span class="text-blue-700 font-bold">
+                                                {{ farmer.name|first|upper }}
+                                            </span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-semibold text-gray-900">{{ farmer.name }}</div>
+                                            <div class="text-xs text-gray-500">{{ farmer.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">
+                                    {{ farmer.location }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900 font-medium tracking-wide">
+                                    {{ farmer.phone }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    {{ farmer.created_at|date:"M d, Y" }}
+                                </td>
+                                <td class="px-6 py-4 text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end space-x-3">
+                                        <!-- Actions -->
+                                        <a href="tel:{{ farmer.phone }}"
+                                            class="text-teal-600 hover:text-teal-900 bg-teal-50 px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                                            <i data-lucide="phone-call" class="w-4 h-4 mr-1"></i> Call
+                                        </a>
+                                        <!-- Optionally hook up to view a list of projects by farmer ID -->
+                                        <a href="/api/panchayat/dashboard"
+                                            class="text-blue-600 hover:text-blue-900 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors flex items-center">
+                                            <i data-lucide="eye" class="w-4 h-4 mr-1"></i> View Projects
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                    <i data-lucide="users" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+                                    <p class="font-medium text-gray-900">No farmers found</p>
+                                    <p class="text-sm mt-1">There are currently no farmers registered in your region.
+                                    </p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="h-8"></div>
+        </div>
+    </main>
+
+    <!-- Mobile Slide-out Menu backdrop -->
+    <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-gray-900/50 z-40 hidden md:hidden"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile Menu
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.querySelector('aside');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('hidden');
+                    sidebar.classList.toggle('absolute');
+                    sidebar.classList.toggle('left-0');
+                    sidebar.classList.toggle('top-0');
+                    sidebar.classList.toggle('h-full');
+                    sidebar.classList.toggle('z-50');
+                    backdrop.classList.toggle('hidden');
+                });
+
+                backdrop.addEventListener('click', () => {
+                    sidebar.classList.add('hidden');
+                    sidebar.classList.remove('absolute', 'left-0', 'top-0', 'h-full', 'z-50');
+                    backdrop.classList.add('hidden');
+                });
+            }
+        });
+
+        // Voice Help
+        function speakHelp() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let lang = localStorage.getItem('farmer_lang') || 'en';
+                let text = "This is the local farmers directory. It lists all the farmers in your region. You can use this page to find their contact details and call them directly if you need more information about their projects.";
+
+                if (lang === 'hi') {
+                    text = "यह स्थानीय किसानों की निर्देशिका है। यह आपके क्षेत्र के सभी किसानों को सूचीबद्ध करता है। आप इस पृष्ठ का उपयोग उनके संपर्क विवरण खोजने और उनकी परियोजनाओं के बारे में अधिक जानकारी की आवश्यकता होने पर उन्हें सीधे कॉल करने के लिए कर सकते हैं।";
+                } else if (lang === 'te') {
+                    text = "ఇది స్థానిక రైతుల డైరెక్టరీ. ఇది మీ ప్రాంతంలోని రైతులందరినీ జాబితా చేస్తుంది. మీరు వారి సంప్రదింపు వివరాలను కనుగొనడానికి మరియు వారి ప్రాజెక్టుల గురించి మీకు మరింత సమాచారం కావాలంటే నేరుగా వారికి కాల్ చేయడానికి ఈ పేజీని ఉపయోగించవచ్చు.";
+                }
+
+                let msg = new SpeechSynthesisUtterance(text);
+                if (lang === 'hi') msg.lang = 'hi-IN';
+                else if (lang === 'te') msg.lang = 'te-IN';
+                else msg.lang = 'en-US';
+
+                window.speechSynthesis.speak(msg);
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificates - BlueCarbon Ledger</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0d9488', // teal-600
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-full relative z-20">
+        <div class="p-6 flex items-center mb-6">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <a href="/api/marketplace"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium">
+                <i data-lucide="shopping-cart" class="w-5 h-5 mr-3"></i> Marketplace
+            </a>
+            <a href="/api/company/portfolio"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium">
+                <i data-lucide="folder-open" class="w-5 h-5 mr-3"></i> My Portfolio
+            </a>
+            <a href="/api/company/certificates"
+                class="flex items-center px-4 py-3 bg-teal-50 text-teal-700 rounded-xl font-medium">
+                <i data-lucide="file-text" class="w-5 h-5 mr-3"></i> Certificates
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/api/login"
+                class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium">
+                <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 flex items-center justify-between p-4">
+        <div class="flex items-center">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <button id="mobile-menu-toggle" class="text-gray-600 focus:outline-none">
+            <i data-lucide="menu" class="h-6 w-6"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden mt-16 md:mt-0 relative z-10 w-full">
+        <header
+            class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm hidden md:flex">
+            <h1 class="text-xl font-bold text-gray-900">Carbon Certificates</h1>
+            <div class="flex items-center space-x-4">
+                <div
+                    class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-semibold border border-gray-200">
+                    Balance: $125,000.00
+                </div>
+                <div class="relative">
+                    <button onclick="document.getElementById('notifications-dropdown').classList.toggle('hidden')"
+                        class="text-gray-400 hover:text-gray-500 relative focus:outline-none">
+                        <span
+                            class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+                        <i data-lucide="bell" class="w-6 h-6"></i>
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="notifications-dropdown"
+                        class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-900">Notifications</h3>
+                        </div>
+                        <div class="max-h-64 overflow-y-auto">
+                            <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-50">
+                                <p class="text-sm text-gray-800 font-medium">Government approved your credit request.
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">2 hours ago</p>
+                            </a>
+                            <a href="#" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-50">
+                                <p class="text-sm text-gray-800 font-medium">Your certificate has been generated.</p>
+                                <p class="text-xs text-gray-500 mt-1">1 day ago</p>
+                            </a>
+                            <a href="#" class="block px-4 py-3 hover:bg-gray-50">
+                                <p class="text-sm text-gray-800 font-medium">1,500 Credits have been allocated to your
+                                    account.</p>
+                                <p class="text-xs text-gray-500 mt-1">2 days ago</p>
+                            </a>
+                        </div>
+                        <div class="px-4 py-2 border-t border-gray-100 text-center">
+                            <a href="#" class="text-xs font-bold text-teal-600 hover:text-teal-700">Mark all as read</a>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="h-8 w-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-xs uppercase">
+                    CORP
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold text-gray-900">Verified Carbon Equivalents</h2>
+                <p class="text-gray-500 mt-1">View and download your verified carbon offset certificates.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for tx in transactions %}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="bg-teal-700 h-2"></div>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <h3 class="font-bold text-gray-900 text-lg mb-1">{{ tx.credit.project.project_name }}</h3>
+                        <p class="text-sm font-medium text-teal-600 mb-4">{{ tx.credits_transferred }} tCO2e Offset</p>
+
+                        <div class="space-y-2 mb-6">
+                            <div class="text-xs text-gray-500">
+                                <span class="block uppercase tracking-wider font-semibold mb-0.5"
+                                    title="Certificate ID">Certificate ID</span>
+                                <span class="font-mono bg-gray-50 px-2 py-1 block rounded mt-1">{{
+                                    tx.blockchain_tx_hash|truncatechars:18 }}</span>
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                <span class="block uppercase tracking-wider font-semibold mb-0.5">Issue Date</span>
+                                <span>{{ tx.timestamp|date:"F d, Y" }}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto grid grid-cols-2 gap-2">
+                            <a href="/api/certificates/{{ tx.blockchain_tx_hash }}.pdf" target="_blank"
+                                class="flex items-center justify-center py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 text-xs font-bold transition-colors">
+                                View PDF
+                            </a>
+                            <button onclick="showProof('{{ tx.blockchain_tx_hash }}')"
+                                class="flex items-center justify-center py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 text-xs font-bold transition-colors">
+                                Data Proof
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div
+                    class="col-span-full py-12 text-center text-gray-500 bg-white rounded-2xl border border-dashed border-gray-300">
+                    No certificates found. Purchase credits to generate your first certificate.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Transaction Proof -->
+    <div id="proof-modal" class="fixed inset-0 bg-gray-900/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 relative">
+            <button onclick="document.getElementById('proof-modal').classList.add('hidden')"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i data-lucide="x"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4 flex items-center text-gray-900">
+                <i data-lucide="shield-check" class="text-teal-600 mr-2 h-6 w-6"></i>
+                Transaction Proof
+            </h3>
+            <div id="proof-content" class="space-y-4 text-sm bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <!-- content populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Slide-out Menu backdrop -->
+    <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-gray-900/50 z-40 hidden md:hidden"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+
+        // Populate tx proof modal
+        const transactionsMap = {
+            {% for tx in transactions %}
+        "{{ tx.blockchain_tx_hash }}": {
+            project: "{{ tx.credit.project.project_name|escapejs }}",
+                farmer: "{{ tx.seller.name|escapejs }}",
+                    credits: "{{ tx.credits_transferred }} tCO2e",
+                        price: "${{ tx.total_value }}",
+                            hash: "{{ tx.blockchain_tx_hash }}",
+                                authority: "Government Carbon Authority"
+        },
+        {% endfor %}
+        };
+
+        function showProof(hash) {
+            const tx = transactionsMap[hash];
+            if (!tx) return;
+            const html = `
+                <div><span class="text-gray-500 block text-xs uppercase font-semibold mb-1">Project</span> <span class="font-medium text-gray-900">${tx.project}</span></div>
+                <div><span class="text-gray-500 block text-xs uppercase font-semibold mb-1">Source Partner</span> <span class="font-medium text-gray-900">${tx.farmer}</span></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><span class="text-gray-500 block text-xs uppercase font-semibold mb-1">Volume</span> <span class="font-bold text-teal-700">${tx.credits}</span></div>
+                    <div><span class="text-gray-500 block text-xs uppercase font-semibold mb-1">Total Value</span> <span class="font-medium text-gray-900">${tx.price}</span></div>
+                </div>
+                <div><span class="text-gray-500 block text-xs uppercase font-semibold mb-1">Verification Authority</span> <span class="font-medium text-gray-900 flex items-center"><i data-lucide="check-circle" class="w-3 h-3 text-green-500 mr-1"></i> ${tx.authority}</span></div>
+                <div><span class="text-gray-500 block text-xs uppercase font-semibold mb-1">Blockchain Hash</span> <span class="font-mono text-xs break-all bg-white p-2 rounded block border border-gray-200">${tx.hash}</span></div>
+            `;
+            document.getElementById('proof-content').innerHTML = html;
+            lucide.createIcons();
+            document.getElementById('proof-modal').classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.querySelector('aside');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('hidden');
+                    sidebar.classList.toggle('absolute');
+                    sidebar.classList.toggle('left-0');
+                    sidebar.classList.toggle('top-0');
+                    sidebar.classList.toggle('h-full');
+                    sidebar.classList.toggle('z-50');
+                    backdrop.classList.toggle('hidden');
+                });
+            }
+            if (backdrop) {
+                backdrop.addEventListener('click', () => {
+                    sidebar.classList.add('hidden');
+                    sidebar.classList.remove('absolute', 'left-0', 'top-0', 'h-full', 'z-50');
+                    backdrop.classList.add('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

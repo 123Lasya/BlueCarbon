@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Project - BlueCarbon Ledger</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#0d9488' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+
+    <!-- Leaflet & Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #0d9488;
+            color: #0d9488;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-full relative z-20">
+        <div class="p-6 flex items-center mb-6">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+            <a href="/api/farmer/dashboard"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> <span
+                    data-i18n="nav_dashboard">Dashboard</span>
+            </a>
+            <a href="/api/projects"
+                class="flex items-center px-4 py-3 bg-teal-50 text-teal-700 rounded-xl font-medium transition-colors">
+                <i data-lucide="plus-circle" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_submit">Submit
+                    Project</span>
+            </a>
+            <a href="/api/farmer/projects"
+                class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="layers" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_my_projects">My Projects</span>
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-200">
+            <a href="/api/login"
+                class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors">
+                <i data-lucide="log-out" class="w-5 h-5 mr-3"></i> <span data-i18n="nav_signout">Sign Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <div
+        class="md:hidden fixed top-0 w-full bg-white border-b border-gray-200 z-30 flex items-center justify-between p-4">
+        <div class="flex items-center">
+            <i data-lucide="leaf" class="h-6 w-6 text-teal-500 mr-2"></i>
+            <span class="font-bold text-lg text-gray-900">BlueCarbon</span>
+        </div>
+        <button id="mobile-menu-toggle" class="text-gray-600 focus:outline-none">
+            <i data-lucide="menu" class="h-6 w-6"></i>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden mt-16 md:mt-0 relative z-10 w-full">
+        <!-- Topbar -->
+        <header
+            class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm hidden md:flex">
+            <h1 class="text-xl font-bold text-gray-900" data-i18n="page_title">Register New Project</h1>
+            <div class="flex items-center space-x-6">
+                <!-- Language Selector -->
+                <div class="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5">
+                    <i data-lucide="globe" class="w-4 h-4 text-gray-500 mr-2"></i>
+                    <select id="lang-selector"
+                        class="bg-transparent text-sm font-medium text-gray-700 focus:outline-none cursor-pointer pr-2">
+                        <option value="en">English (EN)</option>
+                        <option value="hi">हिंदी (HI)</option>
+                        <option value="te">తెలుగు (TE)</option>
+                    </select>
+                </div>
+
+                <button class="text-gray-400 hover:text-gray-500 relative">
+                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                </button>
+                <div class="h-8 w-8 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center font-bold">
+                    RS</div>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+
+            <!-- Global Voice Help FAB -->
+            <button type="button" onclick="speak('page_help')"
+                class="fixed bottom-8 right-8 bg-teal-600 text-white rounded-full p-4 shadow-lg hover:bg-teal-700 hover:scale-105 transition-all z-40 flex items-center justify-center group"
+                title="Voice Help">
+                <i data-lucide="mic" class="w-6 h-6 animate-pulse group-hover:animate-none"></i>
+            </button>
+
+            <div class="md:hidden mb-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-900" data-i18n="page_title">Register New Project</h1>
+                <select id="mobile-lang-selector"
+                    class="text-sm bg-gray-100 border border-gray-200 rounded-lg px-2 py-1 font-medium focus:outline-none">
+                    <option value="en">EN</option>
+                    <option value="hi">HI</option>
+                    <option value="te">TE</option>
+                </select>
+            </div>
+
+            <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <p class="text-gray-600 mb-8" data-i18n="page_desc">Fill out the details below to register your mangrove
+                    plantation project for verification. Our AI will pre-assess the area using satellite data once
+                    submitted.</p>
+
+                <form action="/api/projects" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <!-- Project Name Engine -->
+                    <div>
+                        <div class="flex justify-between items-end mb-1">
+                            <label for="projectName" class="flex items-center text-sm font-bold text-gray-700">
+                                <span data-i18n="f_proj_name">Project Name</span>
+                                <button type="button" onclick="speak('help_proj_name')"
+                                    class="ml-2 text-teal-600 hover:text-teal-800" title="Voice Help"><i
+                                        data-lucide="volume-2" class="w-4 h-4"></i></button>
+                            </label>
+                            <button type="button" onclick="suggestProjectName()"
+                                class="text-xs font-semibold text-teal-600 hover:text-teal-800 flex items-center bg-teal-50 px-2 py-1 rounded-md transition-colors"
+                                data-i18n="f_suggest_name">
+                                <i data-lucide="wand-2" class="w-3 h-3 mr-1"></i> Suggest Name
+                            </button>
+                        </div>
+                        <input type="text" name="projectName" id="projectName" required
+                            class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-base text-gray-900 bg-gray-50"
+                            placeholder="e.g., Sundarbans Sector D Restoration">
+                    </div>
+
+                    <!-- Map/Manual Toggle UI -->
+                    <div class="mt-8 border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                        <div class="flex border-b border-gray-200 bg-gray-50 px-2 pt-2">
+                            <button type="button" id="tab-map"
+                                class="tab-btn active px-6 py-3 text-sm font-medium text-gray-600 hover:text-teal-600 focus:outline-none flex items-center"
+                                data-i18n="tab_map">
+                                <i data-lucide="map" class="w-4 h-4 mr-2"></i> Map Selection
+                            </button>
+                            <button type="button" id="tab-manual"
+                                class="tab-btn px-6 py-3 text-sm font-medium text-gray-600 hover:text-teal-600 focus:outline-none flex items-center"
+                                data-i18n="tab_manual">
+                                <i data-lucide="keyboard" class="w-4 h-4 mr-2"></i> Manual Input
+                            </button>
+                        </div>
+
+                        <div class="p-6">
+                            <!-- MAP MODE -->
+                            <div id="section-map" class="block">
+                                <p class="text-sm text-gray-500 mb-4" data-i18n="map_help">Use the polygon tool (square
+                                    icon) to draw your plantation area. The hectares will calculate automatically.</p>
+                                <div id="map"></div>
+                            </div>
+
+                            <!-- MANUAL MODE -->
+                            <div id="section-manual" class="hidden space-y-4">
+                                <div>
+                                    <label for="location" class="flex items-center text-sm font-bold text-gray-700">
+                                        <span data-i18n="f_location">Location (Village, District)</span>
+                                        <button type="button" onclick="speak('help_location')"
+                                            class="ml-2 text-teal-600 hover:text-teal-800" title="Voice Help"><i
+                                                data-lucide="volume-2" class="w-4 h-4"></i></button>
+                                    </label>
+                                    <input type="text" name="location" id="location" required
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-gray-50">
+                                </div>
+                                <div>
+                                    <label for="coordinates" class="flex items-center text-sm font-bold text-gray-700">
+                                        <span data-i18n="f_gps">GPS Coordinates</span>
+                                        <button type="button" onclick="speak('help_gps')"
+                                            class="ml-2 text-teal-600 hover:text-teal-800" title="Voice Help"><i
+                                                data-lucide="volume-2" class="w-4 h-4"></i></button>
+                                    </label>
+                                    <input type="text" name="coordinates" id="coordinates" required
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-gray-50"
+                                        placeholder="Lat, Long (e.g., 22.0, 88.8)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                        <div>
+                            <label for="area" class="flex items-center text-sm font-bold text-gray-700">
+                                <span data-i18n="f_area">Total Area (Hectares)</span>
+                                <button type="button" onclick="speak('help_area')"
+                                    class="ml-2 text-teal-600 hover:text-teal-800" title="Voice Help"><i
+                                        data-lucide="volume-2" class="w-4 h-4"></i></button>
+                            </label>
+                            <div class="relative mt-1">
+                                <input type="number" step="0.1" name="area" id="area" required readonly
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-gray-100 font-bold text-gray-700 cursor-not-allowed">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 font-semibold text-sm">ha</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-teal-600 mt-1 font-medium italic" data-i18n="f_area_help">
+                                *Auto-calculated from map polygon</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700">Total Area (Acres)</label>
+                            <div class="relative mt-1">
+                                <input type="number" step="0.1" id="area_acres" readonly disabled
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 font-bold text-gray-700 cursor-not-allowed">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 font-semibold text-sm">ac</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="species" class="flex items-center text-sm font-bold text-gray-700">
+                                <span data-i18n="f_species">Primary Species Planted</span>
+                                <button type="button" onclick="speak('help_species')"
+                                    class="ml-2 text-teal-600 hover:text-teal-800" title="Voice Help"><i
+                                        data-lucide="volume-2" class="w-4 h-4"></i></button>
+                            </label>
+                            <select id="species" name="species"
+                                class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-base bg-white">
+                                <option>Rhizophora apiculata (Tall-stilt mangrove)</option>
+                                <option>Avicennia marina (Grey mangrove)</option>
+                                <option>Bruguiera gymnorhiza (Orange mangrove)</option>
+                                <option>Mixed Species</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="date_planted" class="flex items-center text-sm font-bold text-gray-700">
+                            <span data-i18n="f_date">Date of Planting</span>
+                            <button type="button" onclick="speak('help_date')"
+                                class="ml-2 text-teal-600 hover:text-teal-800" title="Voice Help"><i
+                                    data-lucide="volume-2" class="w-4 h-4"></i></button>
+                        </label>
+                        <input type="date" name="date_planted" id="date_planted" required
+                            class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-teal-500 focus:border-teal-500 sm:text-base text-gray-900 bg-white">
+                    </div>
+
+                    <!-- Enhanced File Upload: Camera + Gallery -->
+                    <div>
+                        <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
+                            <span data-i18n="f_upload">Upload Geo-Tagged Images</span>
+                            <button type="button" onclick="speak('help_upload')"
+                                class="ml-2 text-teal-600 hover:text-teal-800" title="Voice Help"><i
+                                    data-lucide="volume-2" class="w-4 h-4"></i></button>
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Camera Option -->
+                            <label for="file-camera"
+                                class="flex flex-col items-center justify-center p-6 border-2 border-teal-300 border-dashed rounded-xl bg-teal-50 hover:bg-teal-100 cursor-pointer transition-colors">
+                                <i data-lucide="camera" class="w-8 h-8 text-teal-600 mb-2"></i>
+                                <span class="text-sm font-bold text-teal-800" data-i18n="f_cam">Take Photo</span>
+                                <input id="file-camera" name="images" type="file" accept="image/*" capture="environment"
+                                    class="sr-only">
+                            </label>
+
+                            <!-- Gallery Option -->
+                            <label for="file-gallery"
+                                class="flex flex-col items-center justify-center p-6 border-2 border-gray-300 border-dashed rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
+                                <i data-lucide="image-plus" class="w-8 h-8 text-gray-500 mb-2"></i>
+                                <span class="text-sm font-bold text-gray-700" data-i18n="f_gal">Browse Gallery</span>
+                                <input id="file-gallery" name="images" type="file" multiple accept="image/*"
+                                    class="sr-only">
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2 text-center" id="upload-status" data-i18n="f_upload_hint">
+                            PNG, JPG up to 10MB.</p>
+                    </div>
+
+                    <div class="pt-6 flex justify-end gap-4 border-t border-gray-200 mt-8">
+                        <button type="submit"
+                            class="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-teal-500 to-blue-600 text-white font-bold text-lg rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                            data-i18n="btn_submit">
+                            Submit for Verification
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Mobile Slide-out Menu backdrop -->
+    <div id="mobile-sidebar-backdrop" class="fixed inset-0 bg-gray-900/50 z-40 hidden md:hidden"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <script>
+        lucide.createIcons();
+
+        // -------------------------------------------------------------
+        // I18N AND TEXT-TO-SPEECH
+        // -------------------------------------------------------------
+        const translations = {
+            'en': {
+                'nav_dashboard': "Dashboard", 'nav_submit': "Submit Project", 'nav_my_projects': "My Projects", 'nav_signout': "Sign Out",
+                'page_title': "Register New Project",
+                'page_desc': "Fill out the details below to register your mangrove plantation project for verification. Our AI will pre-assess the area using satellite data once submitted.",
+                'f_proj_name': "Project Name", 'f_suggest_name': "Suggest Name",
+                'tab_map': "Map Selection", 'tab_manual': "Manual Input",
+                'map_help': "Use the polygon tool (square icon) to draw your plantation area. The hectares will calculate automatically.",
+                'f_location': "Location (Village, District)", 'f_gps': "GPS Coordinates",
+                'f_area': "Total Area (Hectares)", 'f_area_help': "*Auto-calculated from map polygon",
+                'f_species': "Primary Species Planted", 'f_date': "Date of Planting",
+                'f_upload': "Upload Geo-Tagged Images", 'f_cam': "Take Photo", 'f_gal': "Browse Gallery",
+                'f_upload_hint': "PNG, JPG up to 10MB.", 'btn_submit': "Submit for Verification",
+                'page_help': "This is the submission page. Enter your village name, draw your land on the map using the square button, and it will calculate the area. Then take a photo of your trees and submit.",
+                'help_proj_name': "Enter a name for your mangrove project or use the Suggest Name button.",
+                'help_location': "Enter the village and district name manually.",
+                'help_gps': "Enter the exact GPS coordinates like latitude and longitude.",
+                'help_area': "The total area in hectares, calculated from your polygon on the map.",
+                'help_species': "Select the main type of mangrove tree you are planting.",
+                'help_date': "Select the starting date of your plantation.",
+                'help_upload': "Upload clear photos of the planted area."
+            },
+            'hi': {
+                'nav_dashboard': "डैशबोर्ड", 'nav_submit': "नया प्रोजेक्ट जोड़ें", 'nav_my_projects': "मेरे प्रोजेक्ट्स", 'nav_signout': "लॉग आउट",
+                'page_title': "नया प्रोजेक्ट पंजीकृत करें",
+                'page_desc': "सत्यापन के लिए अपने मैंग्रोव वृक्षारोपण प्रोजेक्ट को पंजीकृत करने के लिए नीचे विवरण भरें। हमारा एआई उपग्रह डेटा का उपयोग करके क्षेत्र का पूर्व-मूल्यांकन करेगा।",
+                'f_proj_name': "प्रोजेक्ट का नाम", 'f_suggest_name': "नाम का सुझाव दें",
+                'tab_map': "मानचित्र चयन", 'tab_manual': "मैनुअल इनपुट",
+                'map_help': "अपने वृक्षारोपण क्षेत्र को खींचने के लिए बहुभुज उपकरण (वर्ग चिह्न) का उपयोग करें। हेक्टेयर की गणना स्वतः हो जाएगी।",
+                'f_location': "स्थान (गाँव, जिला)", 'f_gps': "जीपीएस निर्देशांक",
+                'f_area': "कुल क्षेत्रफल (हेक्टेयर)", 'f_area_help': "*मानचित्र बहुभुज से स्वतः गणना की गई",
+                'f_species': "लगाई गई प्राथमिक प्रजाति", 'f_date': "वृक्षारोपण की तिथि",
+                'f_upload': "जियो-टैग की गई छवियां अपलोड करें", 'f_cam': "तस्वीर लें", 'f_gal': "गैलरी ब्राउज़ करें",
+                'f_upload_hint': "PNG, JPG 10MB तक।", 'btn_submit': "सत्यापन के लिए सबमिट करें",
+                'page_help': "यह सबमिशन पेज है। अपने गांव का नाम दर्ज करें, वर्गाकार बटन का उपयोग करके मानचित्र पर अपनी जमीन बनाएं, और यह क्षेत्र की गणना करेगा। फिर अपने पेड़ों की एक तस्वीर लें और सबमिट करें।",
+                'help_proj_name': "अपने प्रोजेक्ट के लिए एक नाम दर्ज करें या सुझाव बटन का उपयोग करें।",
+                'help_location': "गांव और जिले का नाम दर्ज करें।",
+                'help_gps': "सटीक अक्षांश और देशांतर जीपीएस निर्देशांक दर्ज करें।",
+                'help_area': "हेक्टेयर में कुल क्षेत्रफल, जो मानचित्र से गणना की गई है।",
+                'help_species': "मैंग्रोव पेड़ का मुख्य प्रकार चुनें जो आप लगा रहे हैं।",
+                'help_date': "वृक्षारोपण की प्रारंभिक तिथि चुनें।",
+                'help_upload': "लगाए गए क्षेत्र की तस्वीरें अपलोड करें।"
+            },
+            'te': {
+                'nav_dashboard': "డాష్‌బోర్డ్", 'nav_submit': "కొత్త ప్రాజెక్ట్‌ను సమర్పించండి", 'nav_my_projects': "నా ప్రాజెక్ట్‌లు", 'nav_signout': "సైన్ అవుట్",
+                'page_title': "కొత్త ప్రాజెక్ట్‌ను నమోదు చేయండి",
+                'page_desc': "ధృవీకరణ కోసం మీ మడ అడవుల పెంపకం ప్రాజెక్ట్‌ను నమోదు చేయడానికి దిగువ వివరాలను పూరించండి. సమర్పించిన తర్వాత ఉపగ్రహ డేటాను ఉపయోగిoచి మా AI అంచనా వేస్తుంది.",
+                'f_proj_name': "ప్రాజెక్ట్ పేరు", 'f_suggest_name': "పేరును సూచించండి",
+                'tab_map': "మ్యాప్ ఎంపిక", 'tab_manual': "మాన్యువల్ ఇన్పుట్",
+                'map_help': "మీ తోటల ప్రాంతాన్ని గీయడానికి పాలీగాన్ సాధనాన్ని (స్క్వేర్ ఐకాన్) ఉపయోగించండి. హెక్టార్లు స్వయంచాలకంగా లెక్కింపబడతాయి.",
+                'f_location': "స్థానం (గ్రామం, జిల్లా)", 'f_gps': "GPS అక్షాంశ రేఖాంశాలు",
+                'f_area': "మొత్తం ప్రాంతం (హెక్టార్లు)", 'f_area_help': "*మ్యాప్ పాలిగాన్ నిండి స్వయంగా లెక్కింపబడింది",
+                'f_species': "నాటిన ప్రాథమిక జాతులు", 'f_date': "నాటిన తేదీ",
+                'f_upload': "జియో-ట్యాగ్ చిత్రాలను అప్‌లోడ్ చేయండి", 'f_cam': "ఫోటో తీయండి", 'f_gal': "గ్యాలరీని బ్రౌజ్ చేయండి",
+                'f_upload_hint': "PNG, JPG 10MB వరకు.", 'btn_submit': "ధృవీకరణ కోసం సమర్పించండి",
+                'page_help': "ఇది సమర్పణ పేజీ. మీ గ్రామం పేరును నమోదు చేయండి, చతురస్ర బటన్‌ను ఉపయోగించి మ్యాప్‌లో మీ భూమిని గీయండి మరియు ఇది ప్రాంతాన్ని లెక్కిస్తుంది. అప్పుడు మీ చెట్ల ఫోటోను తీసి సమర్పించండి.",
+                'help_proj_name': "మీ మడ అడవుల ప్రాజెక్ట్ కోసం పేరును నమోదు చేయండి.",
+                'help_location': "గ్రామం మరియు జిల్లా పేరును మాన్యువల్‌గా నమోదు చేయండి.",
+                'help_gps': "ఖచ్చితమైన అక్షాంశం మరియు రేఖాంశాలను నమోదు చేయండి.",
+                'help_area': "మ్యాప్‌లో మీ పాలిగాన్ నుండి లెక్కించబడిన మొత్తం ప్రాంతం.",
+                'help_species': "మీరు నాటుతున్న ప్రధాన మడ చెట్టును ఎంచుకోండి.",
+                'help_date': "మీ తోటల పెంపకం ప్రారంభ తేదీని ఎంచుకోండి.",
+                'help_upload': "నాటిన ప్రాంతం యొక్క ఫోటోలను అప్‌లోడ్ చేయండి."
+            }
+        };
+
+        let currentLang = localStorage.getItem('farmer_lang') || 'en';
+
+        function updateUIText() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    if (el.tagName.toLowerCase() === 'input' && el.type === 'text') {
+                        // skip placeholder overrides for now
+                    } else {
+                        // don't wipe inner html tags like icons if they exist inside
+                        if (el.children.length === 0) el.innerText = translations[currentLang][key];
+                        else {
+                            // Find the text node and replace it gently
+                            for (let node of el.childNodes) {
+                                if (node.nodeType === 3 && node.nodeValue.trim().length > 0) {
+                                    node.nodeValue = " " + translations[currentLang][key];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            document.getElementById('lang-selector').value = currentLang;
+            document.getElementById('mobile-lang-selector').value = currentLang;
+        }
+
+        document.getElementById('lang-selector').addEventListener('change', (e) => {
+            currentLang = e.target.value; localStorage.setItem('farmer_lang', currentLang); updateUIText();
+        });
+        document.getElementById('mobile-lang-selector').addEventListener('change', (e) => {
+            currentLang = e.target.value; localStorage.setItem('farmer_lang', currentLang); updateUIText();
+        });
+
+        function speak(key) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = translations[currentLang][key];
+                let msg = new SpeechSynthesisUtterance(text);
+                if (currentLang === 'hi') msg.lang = 'hi-IN';
+                else if (currentLang === 'te') msg.lang = 'te-IN';
+                else msg.lang = 'en-US';
+                msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            }
+        }
+        updateUIText();
+
+        // -------------------------------------------------------------
+        // PROJECT NAME GENERATOR AI
+        // -------------------------------------------------------------
+        function suggestProjectName() {
+            const villages = ["Gosaba", "Pakhiralay", "Bali", "Dayapur", "Satjelia", "Kumirmari"];
+            const v = villages[Math.floor(Math.random() * villages.length)];
+            const suffix = currentLang === 'hi' ? "मैंग्रोव बहाली" : currentLang === 'te' ? "మడ అడవుల పెంపకం" : "Mangrove Restoration";
+            document.getElementById('projectName').value = `${v} ${suffix}`;
+        }
+
+        // -------------------------------------------------------------
+        // UI TABS CONTROL & FILE UPLOADS
+        // -------------------------------------------------------------
+        document.addEventListener('DOMContentLoaded', function () {
+            const tMap = document.getElementById('tab-map');
+            const tMan = document.getElementById('tab-manual');
+            const secMap = document.getElementById('section-map');
+            const secMan = document.getElementById('section-manual');
+            const areaInput = document.getElementById('area');
+            const areaAcres = document.getElementById('area_acres');
+
+            // Sync acres when manually typed
+            areaInput.addEventListener('input', () => {
+                if (areaInput.value) {
+                    areaAcres.value = (parseFloat(areaInput.value) * 2.47105).toFixed(2);
+                } else {
+                    areaAcres.value = '';
+                }
+            });
+
+            tMan.addEventListener('click', () => {
+                tMan.classList.add('active'); tMap.classList.remove('active');
+                secMan.classList.remove('hidden'); secMap.classList.add('hidden');
+                areaInput.removeAttribute('readonly');
+                areaInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-700');
+                areaInput.classList.add('bg-white');
+            });
+            tMap.addEventListener('click', () => {
+                tMap.classList.add('active'); tMan.classList.remove('active');
+                secMap.classList.remove('hidden'); secMan.classList.add('hidden');
+                areaInput.setAttribute('readonly', 'true');
+                areaInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-700');
+                areaInput.classList.remove('bg-white');
+                setTimeout(() => map.invalidateSize(), 100); // fix leaflet sizing bug
+            });
+
+            // Listen for photo uploads to update UI status
+            const camInput = document.getElementById('file-camera');
+            const galInput = document.getElementById('file-gallery');
+            const statusLabel = document.getElementById('upload-status');
+            const hc = () => { statusLabel.innerText = "✓ Images attached for upload."; statusLabel.classList.add('text-teal-600', 'font-bold'); };
+            camInput.addEventListener('change', hc);
+            galInput.addEventListener('change', hc);
+
+            // Leaflet Map Init
+            // Default center: Sundarbans
+            const map = L.map('map').setView([21.82, 88.88], 11);
+
+            // Try to get user current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        map.setView([position.coords.latitude, position.coords.longitude], 14);
+                    },
+                    (error) => {
+                        console.log("Geolocation denied or unavailable.", error);
+                    }
+                );
+            }
+
+            // Satellite Imagery
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            }).addTo(map);
+
+            // Add Place Names/Labels overlay
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Esri Boundaries/Places'
+            }).addTo(map);
+
+            const drawnItems = new L.FeatureGroup();
+            map.addLayer(drawnItems);
+            const drawControl = new L.Control.Draw({
+                edit: { featureGroup: drawnItems },
+                draw: {
+                    polygon: { allowIntersection: false, shapeOptions: { color: '#0d9488' } },
+                    polyline: false, rectangle: false, circle: false, marker: false, circlemarker: false
+                }
+            });
+            map.addControl(drawControl);
+
+            map.on(L.Draw.Event.CREATED, function (event) {
+                const layer = event.layer;
+                drawnItems.clearLayers(); // Only allow one polygon
+                drawnItems.addLayer(layer);
+
+                // Math computation for polygon area (Sq Meters -> Hectares)
+                let latlngs = layer.getLatLngs()[0];
+                let areaSqMeters = L.GeometryUtil.geodesicArea(latlngs);
+                let hectares = (areaSqMeters / 10000).toFixed(2);
+
+                // Set area field
+                areaInput.value = hectares;
+                areaAcres.value = (parseFloat(hectares) * 2.47105).toFixed(2);
+
+                // Grab centroid to set hidden location/gps coordinates based on drawn area
+                let bounds = layer.getBounds();
+                let center = bounds.getCenter();
+                document.getElementById('coordinates').value = `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
+
+                // Reverse geocode proxy (Mock based on center)
+                // Farmers in reality would have location automatically inferred from shapefile bounds
+                document.getElementById('location').value = "Selected on Map";
+            });
+
+            // Mobile menu logic
+            const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+            const sidebar = document.querySelector('aside');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden'); sidebar.classList.toggle('absolute');
+                sidebar.classList.toggle('left-0'); sidebar.classList.toggle('top-0');
+                sidebar.classList.toggle('h-full'); sidebar.classList.toggle('z-50');
+                backdrop.classList.toggle('hidden');
+            });
+            backdrop.addEventListener('click', () => {
+                sidebar.classList.add('hidden'); sidebar.classList.remove('absolute', 'left-0', 'top-0', 'h-full', 'z-50');
+                backdrop.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+
+</html>
